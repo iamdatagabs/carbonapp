@@ -13,3 +13,6 @@ Which NIR wavelengths are repeatedly selected across independent sampling groups
 
 ## Interpretation
 Selection frequency measures stability of this feature-selection procedure, not chemical specificity, causal relevance or validated predictive value. Collinear adjacent wavelengths can exchange importance. Promising regions must be assessed in a separately nested predictive pipeline and ultimately on independent laboratory samples.
+
+## Results
+The 100-resample run identified a repeatedly selected candidate window around 1,440–1,488 nm, but no individual band reached 50% selection frequency. See [the results report](band-stability-results.md) and the downloadable GitHub Actions artifact for the full wavelength-level tables.
