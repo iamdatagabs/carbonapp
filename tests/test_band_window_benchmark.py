@@ -11,7 +11,7 @@ def test_band_window_benchmark_returns_grouped_complete_predictions():
             row = {"Indice": len(rows), "Amostra": point, "Profundidade": layer,
                    "Sample Number": f"{point}-{layer}",
                    "TOC": base + 0.4 * point_signal + rng.normal(scale=0.2), "N": 0.5}
-            for i in range(25):
+            for i in range(50):
                 wavelength = 1400 + 2 * i
                 signal = point_signal if 1440 <= wavelength <= 1488 else rng.normal(scale=0.1)
                 row[f"r{wavelength}"] = 0.04 + signal * 0.0005 + rng.normal(scale=0.0001)
