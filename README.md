@@ -27,7 +27,14 @@ The repository includes a spectral dataset with:
 | `src/carbonapp/data.py` | Dataset schema validation and spectral-band discovery |
 | `src/carbonapp/statistics.py` | Descriptive statistics, spectral summaries and exploratory associations |
 | `src/carbonapp/experimental.py` | Sampling-design audit, replicate aggregation and paired cluster bootstrap |
-| `src/carbonapp/evaluation.py` | GroupKFold Huber baseline with fold-local preprocessing |\n| `src/carbonapp/model_comparison.py` | Grouped OOF comparison: Huber, Extra Trees, Elastic Net and Bayesian Ridge |\n| `docs/model-comparison-protocol.md` | Grouping strategy, model comparison and selection caveats |
+| `src/carbonapp/evaluation.py` | GroupKFold Huber baseline with fold-local preprocessing |
+| `src/carbonapp/model_comparison.py` | Grouped OOF comparison: Huber, Extra Trees, Elastic Net and Bayesian Ridge |
+| `src/carbonapp/uncertainty.py` | Group-aware split-conformal prediction intervals |
+| `src/carbonapp/interpretability.py` | Feature stability, grouped permutation importance, optional SHAP and depth-stratified analysis |
+| `src/carbonapp/tinyml.py` | Linear ONNX export, dynamic INT8 quantization and host benchmarking |
+| `docs/model-comparison-protocol.md` | Grouping strategy, model comparison and selection caveats |
+| `docs/interpretability-protocol.md` | Explainability methods, grouping and scientific interpretation limits |
+| `docs/tinyml-protocol.md` | TinyML conversion, measurement and deployment safeguards |
 | `tests/` | Unit tests for depth, statistics and experimental-design functions |
 | `pyproject.toml` | Python package and development dependencies |
 | `Filtro_Carbono.ipynb` | Original filter-based feature-selection experiments |
@@ -39,7 +46,8 @@ The repository includes a spectral dataset with:
 2. **Descriptive and inferential statistics:** distributions, associations, uncertainty and group-aware comparisons.
 3. **Machine learning:** reproducible baselines and model comparisons for TOC and N, with preprocessing and feature selection inside cross-validation.
 4. **Probabilistic evaluation:** prediction intervals, calibration and uncertainty analysis.
-5. **Interpretability:** fold-wise feature-selection stability, group-held-out permutation importance, optional SHAP and depth-stratified analyses.\n6. **TinyML:** compact linear ONNX models, dynamic INT8 quantization and measured host/device performance.
+5. **Interpretability:** fold-wise feature-selection stability, group-held-out permutation importance, optional SHAP and depth-stratified analyses.
+6. **TinyML:** compact linear ONNX models, dynamic INT8 quantization and measured host/device performance.
 7. **Soil visualization:** interactive vertical profiles linked to verified depth intervals; spatial 3D only when spatial coordinates support it.
 8. **Web platform:** interactive scientific dashboards and reproducible reports.
 
