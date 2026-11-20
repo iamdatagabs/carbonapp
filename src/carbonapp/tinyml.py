@@ -41,11 +41,15 @@ def export_linear_pipeline_onnx(estimator, feature_names: list[str], output_path
         raise ValueError("Selected feature count does not match linear coefficient count")
     intercept = float(np.asarray(model.intercept_).reshape(-1)[0])
     if "scale" in steps:
+        # StandardScaler is fitted after SelectKBest, so its arrays are already
+        # in selected-feature coordinates (unlike the original input matrix).
         scaler = steps["scale"]
         scales = np.asarray(scaler.scale_, dtype=np.float64)
         means = np.asarray(scaler.mean_, dtype=np.float64)
-        coefficients_raw = coefficients / scales[selected]
-        intercept -= float(np.sum(coefficients * means[selected] / scales[selected]))
+        if len(scales) != len(selected) or len(means) != len(selected):
+            raise ValueError("Scaler dimensions do not match selected feature count")
+        coefficients_raw = coefficients / scales
+        intercept -= float(np.sum(coefficients * means / scales))
     else:
         coefficients_raw = coefficients
     weights = np.zeros(len(feature_names), dtype=np.float32)
