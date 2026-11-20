@@ -4,6 +4,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pandas as pd
+
 from .data import load_dataset
 from .depth import depth_metadata
 from .profile import build_profile_3d_payload, build_profile_summary, build_vertical_profile
@@ -48,7 +50,7 @@ def create_app(data_path: str | Path | None = None):
             "n_sample_numbers": int(frame["Sample Number"].nunique()),
             "n_spectral_bands": int(len([c for c in frame.columns if c.startswith("r") and c[1:].isdigit()])),
             "target": target,
-            "profile_summary": build_profile_summary(frame, target).where(lambda x: x.notna(), None).to_dict(orient="records"),
+            "profile_summary": build_profile_summary(frame, target).astype(object).where(pd.notna(build_profile_summary(frame, target)), None).to_dict(orient="records"),
         }
 
     @app.get("/api/v1/profiles/{point_id}")
