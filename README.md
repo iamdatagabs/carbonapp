@@ -161,3 +161,31 @@ simultaneous within-group coverage under exchangeability of independent groups.
 If the calibration partition has too few groups for the requested coverage,
 the interval is infinite by the finite-sample rule; do not replace it with an
 arbitrary percentile. See `docs/uncertainty-methodology.md`.
+
+## Spectral interpretability
+
+Install the optional SHAP dependency when needed:
+
+```bash
+pip install -e ".[explainability]"
+```
+
+Run group-aware analyses:
+
+```python
+from carbonapp.data import load_dataset
+from carbonapp.interpretability import (
+    feature_selection_stability,
+    grouped_permutation_importance,
+    grouped_shap_explanation,
+    depth_stratified_importance,
+)
+
+df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
+stability = feature_selection_stability(df, target="TOC", group_column="Sample Number")
+permutation = grouped_permutation_importance(df, target="TOC", group_column="Sample Number")
+shap_result = grouped_shap_explanation(df, target="TOC", group_column="Sample Number")
+depth_importance = depth_stratified_importance(df, target="TOC")
+```
+
+The selection-stability analysis refits the feature selector within each training fold. Permutation and SHAP explanations use held-out groups. Spectral collinearity means individual-band importance is not causal or chemical proof; interpret contiguous bands and depth-specific analyses cautiously. See `docs/interpretability-protocol.md`.
