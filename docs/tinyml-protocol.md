@@ -2,7 +2,7 @@
 
 ## Supported first target
 
-The first deployable path exports fitted linear regression pipelines containing `SelectKBest`, optional `StandardScaler`, and a linear estimator (Huber, Elastic Net, or Bayesian Ridge) to a compact ONNX Gemm graph. The selector and scaler are algebraically folded into one full-input coefficient vector. Tree ensembles are not exported by this first implementation.
+The first deployable path exports fitted linear regression pipelines containing `SelectKBest`, optional `StandardScaler`, and a linear estimator (Huber, Elastic Net, or Bayesian Ridge) to a compact ONNX MatMul + Add graph. The selector and scaler are algebraically folded into one full-input coefficient vector. Tree ensembles are not exported by this first implementation.
 
 Install optional dependencies:
 
