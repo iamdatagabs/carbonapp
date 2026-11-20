@@ -85,7 +85,7 @@ def nested_within_depth_nir(frame, group_column="Amostra", outer_splits=5,
                         d_train[inner_train], inner_means, inner_global
                     )
                     estimator = _estimator(
-                        "nir" if prep == "raw" else "nir_savgol_first_derivative",
+                        "nir_raw" if prep == "raw" else "nir_savgol_first_derivative",
                         model, len(bands), min(k, len(bands)), random_state
                     )
                     estimator.fit(x_train[inner_train], residual_train)
