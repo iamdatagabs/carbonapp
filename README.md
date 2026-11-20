@@ -97,6 +97,17 @@ profile_3d = build_profile_3d_payload(df, target="TOC")
 
 For SHAP, use `grouped_shap_explanation` after installing the `explainability` extra. See `docs/model-comparison-protocol.md`, `docs/uncertainty-methodology.md` and `docs/interpretability-protocol.md`.
 
+## End-to-end reproducible run
+
+Install the API and TinyML extras, then execute the full TOC workflow:
+
+```bash
+pip install -e ".[dev,api,tinyml]"
+python scripts/run_research_pipeline.py --data "data/raw/[quad]base_nirs_refletancia.csv" --output reports/latest-run --seed 42 --splits 5
+```
+
+The runner writes a dataset hash manifest, nested grouped CV at reference and point levels, interpretability tables, conformal diagnostics, depth summaries, and a float-vs-INT8 ONNX comparison on held-out groups. It can be computationally demanding. See `docs/reproducible-run.md`.
+
 ## API and interactive dashboard
 
 Install the API extra and start the service:
