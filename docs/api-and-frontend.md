@@ -11,7 +11,7 @@ uvicorn carbonapp.api:create_app --factory --reload
 
 The API reads `data/raw/[quad]base_nirs_refletancia.csv` by default. Set `CARBONAPP_DATA_PATH` to override it.
 
-Open `apps/frontend/index.html` through a static HTTP server. If the frontend is served from another origin, define `window.CARBONAPP_API_BASE` before loading `app.js` and configure CORS at the API deployment layer for the exact frontend origin. Do not use a wildcard origin with credentials.
+Open `apps/frontend/index.html` through a static HTTP server. If the frontend is served from another origin, define `window.CARBONAPP_API_BASE` before loading `app.js` and set `CARBONAPP_CORS_ORIGINS` to a comma-separated allowlist of exact origins (for example `https://yourname.github.io`). The API permits GET only and does not enable credentials. Do not use a wildcard origin.
 
 ## Endpoints
 
