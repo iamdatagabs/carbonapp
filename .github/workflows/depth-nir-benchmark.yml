@@ -1,0 +1,71 @@
+name: Depth versus NIR benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      outer_splits:
+        description: Outer grouped folds
+        required: true
+        default: "5"
+        type: string
+      inner_splits:
+        description: Inner grouped folds
+        required: true
+        default: "4"
+        type: string
+      seed:
+        description: Random seed
+        required: true
+        default: "42"
+        type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/carbonapp/depth_nir_benchmark.py"
+      - "scripts/run_depth_nir_benchmark.py"
+      - "tests/test_depth_nir_benchmark.py"
+      - ".github/workflows/depth-nir-benchmark.yml"
+      - "data/raw/**"
+  push:
+    branches: [main]
+    paths:
+      - "src/carbonapp/depth_nir_benchmark.py"
+      - "scripts/run_depth_nir_benchmark.py"
+      - "tests/test_depth_nir_benchmark.py"
+      - ".github/workflows/depth-nir-benchmark.yml"
+      - "data/raw/**"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install project
+        run: pip install -e ".[dev,api]"
+      - name: Run tests
+        run: pytest -q
+      - name: Run depth-versus-NIR benchmark
+        run: |
+          python scripts/run_depth_nir_benchmark.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/depth-nir-benchmark \
+            --seed "${{ inputs.seed || '42' }}" \
+            --outer-splits "${{ inputs.outer_splits || '5' }}" \
+            --inner-splits "${{ inputs.inner_splits || '4' }}"
+      - name: Upload benchmark outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: carbonapp-depth-nir-benchmark-${{ github.run_number }}
+          path: reports/depth-nir-benchmark/
+          if-no-files-found: error
+          retention-days: 30
