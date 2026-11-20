@@ -27,3 +27,17 @@ def test_comparison_produces_oof_predictions():
 def test_invalid_model_and_too_few_groups_raise():
     with pytest.raises(ValueError, match="Unsupported models"): compare_grouped_models(synthetic_frame(), models=("random_forest",))
     with pytest.raises(ValueError, match="unique groups"): compare_grouped_models(synthetic_frame(n_groups=4), n_splits=5)
+
+
+def test_nested_grouped_selection_returns_outer_predictions():
+    from carbonapp.model_comparison import nested_grouped_model_selection
+
+    frame = synthetic_frame(n_groups=12)
+    result = nested_grouped_model_selection(
+        frame, outer_splits=3, inner_splits=2, k=4,
+        models=("huber", "extra_trees")
+    )
+    assert len(result["predictions"]) == len(frame)
+    assert len(result["folds"]) == 3
+    assert sum(result["selected_model_counts"].values()) == 3
+    assert np.isfinite(result["metrics"]["rmse"])
