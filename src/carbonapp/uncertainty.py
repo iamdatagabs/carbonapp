@@ -76,7 +76,8 @@ def grouped_split_conformal(
         "n_calibration_groups": int(len(group_scores)),
         "n_test_groups": int(pd.Series(groups[test_idx]).nunique()),
         "n_train_rows": int(len(train_idx)), "n_calibration_rows": int(len(cal_idx)),
-        "n_test_rows": int(len(test_idx)), "quantile": quantile_output,\n        "interval_status": "finite" if np.isfinite(q_hat) else "unbounded",
+        "n_test_rows": int(len(test_idx)), "quantile": quantile_output,
+        "interval_status": "finite" if np.isfinite(q_hat) else "unbounded",
         "metrics": {
             "row_coverage": float(np.mean(covered)),
             "group_simultaneous_coverage": float(np.mean(group_covered)),
