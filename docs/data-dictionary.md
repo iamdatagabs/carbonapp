@@ -15,8 +15,8 @@ Este documento descreve o que foi observado no arquivo `data/raw/[quad]base_nirs
 | Coluna | Tipo observado | Descrição preliminar | Pendência |
 |---|---|---|---|
 | `Indice` | inteiro | Índice sequencial do registro | Confirmar se é apenas índice técnico |
-| `Amostra` | identificador | Código/identificador da amostra | Confirmar unidade amostral |
-| `Profundidade` | categórico | Código A–I | Recuperar a correspondência exata entre cada código e seus limites físicos em cm |
+| `Amostra` | identificador | Número do ponto/parcela de coleta; identifica o perfil vertical | Confirmar se pontos distintos são unidades independentes ou se pertencem a blocos/agrupamentos |
+| `Profundidade` | categórico | Letra A–I que identifica a camada dentro de cada ponto | Correspondência física confirmada na tabela abaixo |
 | `Sample Number` | identificador | Identificador alfanumérico | Confirmar relação com Amostra |
 | `TOC` | numérico | Carbono orgânico total | Confirmar unidade e método de referência |
 | `N` | numérico | Nitrogênio | Confirmar se representa nitrogênio total, unidade e método |
@@ -43,7 +43,7 @@ O experimento abrange um perfil vertical de solo de **0 a 200 cm (2 m)**, dividi
 | H | 130 | 160 | 30 |
 | I | 160 | 200 | 40 |
 
-A profundidade é uma variável categórica no CSV, mas possui uma ordem física conhecida. A aplicação deve manter a categoria original (A–I) e associar cada código aos limites numéricos acima por meio de um dicionário explícito, sem depender da ordenação alfabética implícita.
+A profundidade é uma variável categórica no CSV, mas possui uma ordem física conhecida. Cada letra identifica uma camada coletada dentro do ponto indicado por `Amostra`; portanto, as observações de diferentes profundidades do mesmo ponto são medidas repetidas/pareadas no desenho vertical. A aplicação deve manter a categoria original (A–I) e associar cada código aos limites numéricos acima por meio de um dicionário explícito, sem depender da ordenação alfabética implícita.
 
 Para visualizações do perfil, usar os limites reais das camadas e respeitar as espessuras desiguais. A profundidade pode ser representada no eixo vertical (0 cm na superfície e 200 cm na base); não interpolar nem sugerir continuidade espacial lateral sem dados que sustentem essa operação.
 
@@ -91,4 +91,4 @@ A base possui 224 valores únicos de `Sample Number` em 266 registros:
 
 Os valores de TOC e N são iguais entre registros que compartilham o mesmo `Sample Number`. A hipótese de que sejam réplicas espectrais deve ser validada com o protocolo experimental. Até lá, `Sample Number` deve ser preservado como identificador de agrupamento e jamais usado como preditor numérico.
 
-**Regra de particionamento:** todas as linhas de um mesmo `Sample Number` devem ficar juntas na mesma partição de treino, validação ou teste. Isso evita que medições associadas ao mesmo resultado laboratorial sejam distribuídas entre treino e teste.
+**Regra de particionamento:** todas as linhas de um mesmo `Sample Number` devem ficar juntas na mesma partição de treino, validação ou teste. Isso evita que medições associadas ao mesmo resultado laboratorial sejam distribuídas entre treino e teste. Em análises inferenciais por profundidade, a unidade de pareamento/cluster é o ponto identificado por `Amostra`, e não cada linha nem cada camada isoladamente.
