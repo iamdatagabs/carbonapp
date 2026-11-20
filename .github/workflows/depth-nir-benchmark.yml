@@ -21,7 +21,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "src/carbonapp/depth_nir_benchmark.py"
+      - "src/carbonapp/depth_nir_benchmark.py"\n      - "src/carbonapp/within_depth_nir.py"\n      - "scripts/run_within_depth_nir.py"\n      - "tests/test_within_depth_nir.py"\n      - "docs/within-depth-nir-benchmark.md"
       - "scripts/run_depth_nir_benchmark.py"
       - "src/carbonapp/depth_nir_residual_audit.py"
       - "scripts/run_depth_nir_residual_audit.py"
@@ -76,12 +76,20 @@ jobs:
             --data "data/raw/[quad]base_nirs_refletancia.csv" \
             --results reports/depth-nir-benchmark \
             --output reports/depth-nir-residual-audit
+      - name: Run within-depth NIR residual benchmark
+        run: |
+          python scripts/run_within_depth_nir.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/within-depth-nir \
+            --seed "${{ inputs.seed || '42' }}" \
+            --outer-splits "${{ inputs.outer_splits || '5' }}" \
+            --inner-splits "${{ inputs.inner_splits || '4' }}"
       - name: Upload benchmark outputs
         uses: actions/upload-artifact@v4
         with:
           name: carbonapp-depth-nir-benchmark-${{ github.run_number }}
           path: |
             reports/depth-nir-benchmark/
-            reports/depth-nir-residual-audit/
+            reports/depth-nir-residual-audit/\n            reports/within-depth-nir/
           if-no-files-found: error
           retention-days: 30
