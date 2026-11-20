@@ -98,11 +98,11 @@ jobs:
             --inner-splits "${{ inputs.inner_splits || '4' }}"
       - name: Run layer-wise NIR benchmark
         run: |
-          python scripts/run_layerwise_nir.py \\
-            --data "data/raw/[quad]base_nirs_refletancia.csv" \\
-            --output reports/layerwise-nir \\
-            --seed "${{ inputs.seed || '42' }}" \\
-            --outer-splits "${{ inputs.outer_splits || '5' }}" \\
+          python scripts/run_layerwise_nir.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/layerwise-nir \
+            --seed "${{ inputs.seed || '42' }}" \
+            --outer-splits "${{ inputs.outer_splits || '5' }}" \
             --inner-splits "${{ inputs.inner_splits || '4' }}"
       - name: Upload benchmark outputs
         uses: actions/upload-artifact@v4
