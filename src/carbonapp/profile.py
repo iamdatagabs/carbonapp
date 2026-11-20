@@ -117,5 +117,5 @@ def build_profile_3d_payload(
         "axes": {"x": "sampling point (categorical index; not geographic)", "y": target, "z": "depth (cm; negative downward)"},
         "x": x, "y": y, "z": z, "points": values,
         "depth_intervals": depths,
-        "spatial_warning": "This is a point-by-depth visualization, not a geographic 3D soil volume. Spatial coordinates and a sampling design are required for interpolation or volumetric claims.",
+        "spatial_warning": "This is a point-by-depth visualization, not geographic space and not a geographic 3D soil volume. Spatial coordinates and a sampling design are required for interpolation or volumetric claims.",
     }
