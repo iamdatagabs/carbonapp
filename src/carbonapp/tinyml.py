@@ -86,7 +86,7 @@ def quantize_onnx_dynamic(input_path: str | Path, output_path: str | Path) -> di
     if not source.exists():
         raise FileNotFoundError(source)
     output.parent.mkdir(parents=True, exist_ok=True)
-    quantize_dynamic(str(source), str(output), weight_type=QuantType.QInt8)
+    quantize_dynamic(str(source), str(output), weight_type=QuantType.QInt8, op_types_to_quantize=["Gemm"])
     return {
         "path": str(output),
         "float_size_bytes": int(source.stat().st_size),
