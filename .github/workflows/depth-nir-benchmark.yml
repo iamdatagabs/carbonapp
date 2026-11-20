@@ -23,15 +23,19 @@ on:
     paths:
       - "src/carbonapp/depth_nir_benchmark.py"
       - "src/carbonapp/within_depth_nir.py"
+      - "src/carbonapp/layerwise_nir.py"
       - "scripts/run_depth_nir_benchmark.py"
       - "scripts/run_within_depth_nir.py"
+      - "scripts/run_layerwise_nir.py"
       - "src/carbonapp/depth_nir_residual_audit.py"
       - "scripts/run_depth_nir_residual_audit.py"
       - "tests/test_depth_nir_benchmark.py"
       - "tests/test_within_depth_nir.py"
+      - "tests/test_layerwise_nir.py"
       - "tests/test_depth_nir_residual_audit.py"
       - "docs/depth-nir-residual-audit.md"
       - "docs/within-depth-nir-benchmark.md"
+      - "docs/layerwise-nir-benchmark.md"
       - ".github/workflows/depth-nir-benchmark.yml"
       - "data/raw/**"
   push:
@@ -92,6 +96,14 @@ jobs:
             --seed "${{ inputs.seed || '42' }}" \
             --outer-splits "${{ inputs.outer_splits || '5' }}" \
             --inner-splits "${{ inputs.inner_splits || '4' }}"
+      - name: Run layer-wise NIR benchmark
+        run: |
+          python scripts/run_layerwise_nir.py \\
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \\
+            --output reports/layerwise-nir \\
+            --seed "${{ inputs.seed || '42' }}" \\
+            --outer-splits "${{ inputs.outer_splits || '5' }}" \\
+            --inner-splits "${{ inputs.inner_splits || '4' }}"
       - name: Upload benchmark outputs
         uses: actions/upload-artifact@v4
         with:
@@ -100,5 +112,6 @@ jobs:
             reports/depth-nir-benchmark/
             reports/depth-nir-residual-audit/
             reports/within-depth-nir/
+            reports/layerwise-nir/
           if-no-files-found: error
           retention-days: 30
