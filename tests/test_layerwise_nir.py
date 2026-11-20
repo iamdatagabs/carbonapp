@@ -10,11 +10,12 @@ def test_layerwise_benchmark_aggregates_repeats_and_returns_grouped_predictions(
     for point in range(10):
         for layer, base in zip("ABC", (30.0, 15.0, 5.0)):
             signal = rng.normal()
+            target_toc = base + 0.8 * signal + rng.normal(scale=0.05)
             for repeat in range(2):
                 row = {
                     "Indice": len(rows), "Amostra": point,
                     "Profundidade": layer, "Sample Number": f"{point}-{layer}",
-                    "TOC": base + 0.8 * signal + rng.normal(scale=0.05), "N": 0.5,
+                    "TOC": target_toc, "N": 0.5,
                 }
                 row.update({
                     f"r{1100 + 2*i}": 0.04 + signal * (i + 1) * 0.0001
