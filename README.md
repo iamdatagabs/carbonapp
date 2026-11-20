@@ -7,7 +7,7 @@ The original research notebooks and source data are preserved. New engineering w
 ## Product applications (MVP)
 
 The product foundation is being developed alongside the research core:
-- **Web:** `apps/frontend/` — responsive research dashboard with vertical and categorical 3D profile exploration.
+- **Web:** `apps/web/` — responsive field-capture console connected to Java API; `apps/frontend/` remains the research dashboard with vertical and categorical 3D profile exploration.
 - **Backend:** `apps/backend/` — Java 21 / Spring Boot REST API, PostgreSQL persistence and versioned endpoints.
 - **Android:** `apps/mobile/` — Kotlin + Jetpack Compose field-capture prototype.
 - **Architecture and roadmap:** [docs/application-architecture.md](docs/application-architecture.md).
@@ -165,6 +165,7 @@ This snippet illustrates the API only; final artifacts must be trained under the
 - `docs/`: dissertation, audits, scientific protocols and product architecture
 - `src/carbonapp/`: reusable scientific and API modules
 - `apps/frontend/`: static interactive research dashboard
+- `apps/web/`: responsive field-capture web MVP
 - `apps/backend/`: Java Spring Boot product API
 - `apps/mobile/`: Kotlin Android field-capture MVP
 - `tests/`: automated tests
