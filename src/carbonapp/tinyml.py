@@ -59,8 +59,9 @@ def export_linear_pipeline_onnx(estimator, feature_names: list[str], output_path
         helper.make_tensor("weights", TensorProto.FLOAT, [len(feature_names), 1], weights.tolist()),
         helper.make_tensor("bias", TensorProto.FLOAT, [1], bias.tolist()),
     ]
-    node = helper.make_node("Gemm", ["spectra", "weights", "bias"], ["prediction"], alpha=1.0, beta=1.0, transB=0)
-    graph = helper.make_graph([node], "carbonapp_linear_regressor", [input_info], [output_info], initializers)
+    matmul = helper.make_node("MatMul", ["spectra", "weights"], ["linear_output"])
+    add_bias = helper.make_node("Add", ["linear_output", "bias"], ["prediction"])
+    graph = helper.make_graph([matmul, add_bias], "carbonapp_linear_regressor", [input_info], [output_info], initializers)
     model_proto = helper.make_model(graph, producer_name="carbonapp", opset_imports=[helper.make_opsetid("", 13)])
     onnx.checker.check_model(model_proto)
     output = Path(output_path)
@@ -86,7 +87,7 @@ def quantize_onnx_dynamic(input_path: str | Path, output_path: str | Path) -> di
     if not source.exists():
         raise FileNotFoundError(source)
     output.parent.mkdir(parents=True, exist_ok=True)
-    quantize_dynamic(str(source), str(output), weight_type=QuantType.QInt8, op_types_to_quantize=["Gemm"])
+    quantize_dynamic(str(source), str(output), weight_type=QuantType.QInt8, op_types_to_quantize=["MatMul"])
     return {
         "path": str(output),
         "float_size_bytes": int(source.stat().st_size),
