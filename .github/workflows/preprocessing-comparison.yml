@@ -18,6 +18,15 @@ on:
         required: true
         default: "42"
         type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/carbonapp/preprocessing.py"
+      - "src/carbonapp/preprocessing_comparison.py"
+      - "scripts/run_preprocessing_comparison.py"
+      - "tests/test_preprocessing_comparison.py"
+      - ".github/workflows/preprocessing-comparison.yml"
+      - "data/raw/**"
   push:
     branches: [main]
     paths:
