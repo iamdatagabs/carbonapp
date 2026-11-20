@@ -1,0 +1,39 @@
+name: Repeated NIR band stability
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/carbonapp/stability.py"
+      - "scripts/run_band_stability.py"
+      - "data/raw/**"
+      - ".github/workflows/band-stability.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/carbonapp/stability.py"
+      - "scripts/run_band_stability.py"
+      - "tests/test_stability.py"
+      - ".github/workflows/band-stability.yml"
+
+jobs:
+  grouped-band-stability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install research package
+        run: pip install -e ".[dev,api]"
+      - name: Run repeated grouped band stability
+        run: python scripts/run_band_stability.py --resamples 100 --seed 42 --output reports/band-stability
+      - name: Upload band stability reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: carbonapp-band-stability
+          path: reports/band-stability/
+          if-no-files-found: error
+          retention-days: 30
