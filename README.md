@@ -39,7 +39,7 @@ The repository includes a spectral dataset with:
 2. **Descriptive and inferential statistics:** distributions, associations, uncertainty and group-aware comparisons.
 3. **Machine learning:** reproducible baselines and model comparisons for TOC and N, with preprocessing and feature selection inside cross-validation.
 4. **Probabilistic evaluation:** prediction intervals, calibration and uncertainty analysis.
-5. **Interpretability:** fold-wise feature-selection stability, group-held-out permutation importance, optional SHAP and depth-stratified analyses.\n6. **TinyML:** compact models, quantization and measurements of latency, memory and model size after scientific validation.
+5. **Interpretability:** fold-wise feature-selection stability, group-held-out permutation importance, optional SHAP and depth-stratified analyses.\n6. **TinyML:** compact linear ONNX models, dynamic INT8 quantization and measured host/device performance.
 7. **Soil visualization:** interactive vertical profiles linked to verified depth intervals; spatial 3D only when spatial coordinates support it.
 8. **Web platform:** interactive scientific dashboards and reproducible reports.
 
@@ -218,3 +218,32 @@ depth_importance = depth_stratified_importance(df, target="TOC")
 ```
 
 Permutation and SHAP explanations use held-out groups. Spectral collinearity means individual-band importance is not causal or chemical proof; interpret contiguous bands and depth-specific analyses cautiously. See `docs/interpretability-protocol.md`.
+
+
+## TinyML: compact ONNX models
+
+Install the optional conversion/runtime dependencies:
+
+```bash
+pip install -e ".[tinyml]"
+```
+
+The first export path supports fitted linear pipelines (Huber, Elastic Net and Bayesian Ridge) and folds feature selection/scaling into a single ONNX linear operator:
+
+```python
+from carbonapp.data import load_dataset, spectral_columns
+from carbonapp.model_comparison import build_model_pipeline
+from carbonapp.tinyml import (
+    export_linear_pipeline_onnx,
+    quantize_onnx_dynamic,
+    benchmark_onnx_model,
+)
+
+df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
+bands = spectral_columns(df)
+model = build_model_pipeline("huber", k=40).fit(df[bands], df["TOC"])
+export_linear_pipeline_onnx(model, bands, "models/onnx/toc_huber.onnx")
+quantize_onnx_dynamic("models/onnx/toc_huber.onnx", "models/onnx/toc_huber_int8.onnx")
+```
+
+Benchmark float and quantized artifacts on the same held-out spectra using `benchmark_onnx_model`. Report model bytes, median/p95 host CPU latency and prediction agreement. Python allocation tracking is not embedded RAM; host measurements do not establish microcontroller performance or energy use. See `docs/tinyml-protocol.md`.
