@@ -135,6 +135,7 @@ def run(data_path: Path, output_dir: Path, seed: int = 42, n_splits: int = 5):
     }
     _write_json(output_dir / "tinyml-comparison.json", {
         "selected_model": selected_model,
+        "selection_scope": "most frequently selected among the linear families supported by the current ONNX exporter; this may differ from the overall nested-CV winner if Extra Trees is selected more often",
         "n_train_groups": int(pd.Series(groups[train_idx]).nunique()),
         "n_test_groups": int(pd.Series(groups[test_idx]).nunique()),
         "float_task_metrics": float_metrics,
