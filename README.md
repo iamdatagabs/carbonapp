@@ -22,10 +22,13 @@ The repository includes a spectral dataset with:
 | `docs/Dissertacao.pdf` | Master's dissertation |
 | `docs/technical-audit.md` | Initial methodological and software audit |
 | `docs/data-dictionary.md` | Data dictionary, spectral schema and confirmed depth intervals |
+| `docs/statistical-methodology.md` | Statistical methods and inferential limitations |
 | `src/carbonapp/depth.py` | Authoritative 0–200 cm soil profile metadata |
 | `src/carbonapp/data.py` | Dataset schema validation and spectral-band discovery |
+| `src/carbonapp/statistics.py` | Descriptive statistics, spectral summaries and exploratory associations |
+| `src/carbonapp/experimental.py` | Sampling-design audit, replicate aggregation and paired cluster bootstrap |
 | `src/carbonapp/evaluation.py` | GroupKFold evaluation with preprocessing inside each fold |
-| `tests/test_depth.py` | Tests for profile geometry |
+| `tests/` | Unit tests for depth, statistics and experimental-design functions |
 | `pyproject.toml` | Python package and development dependencies |
 | `Filtro_Carbono.ipynb` | Original filter-based feature-selection experiments |
 | `RFE_Carbon.ipynb` | Original recursive feature-elimination experiments |
@@ -48,10 +51,14 @@ The repository includes a spectral dataset with:
 - Record dataset versions, random seeds, transformations, hyperparameters and metrics.
 - Distinguish reproduced dissertation results from new experiments.
 - Do not infer laboratory units or physical depth mappings from column names alone.
+- Treat repeated `Sample Number` rows as technical replicates only after confirming their laboratory meaning.
+- Use profile-level resampling only after confirming that the selected profile identifier represents the independent sampling unit.
 
 ## Current status
 
-The current branch, `research/reproducible-core`, contains the audit, data dictionary, authoritative depth metadata, dataset validation, a grouped Huber baseline and initial tests. The original notebooks are retained as historical research artifacts; their evaluation procedures require revision before their scores can be treated as unbiased estimates. The grouped evaluator keeps repeated `Sample Number` observations in the same GroupKFold fold and fits scaling and feature selection inside each fold.
+The `research/reproducible-core` branch contains the audit, data dictionary, authoritative depth metadata, dataset validation, grouped Huber baseline, descriptive statistics, sampling-design audit and an exploratory paired depth bootstrap. The original notebooks are retained as historical research artifacts; their evaluation procedures require revision before their scores can be treated as unbiased estimates.
+
+The grouped evaluator keeps repeated `Sample Number` observations in the same GroupKFold fold and fits scaling and feature selection inside each fold. The experimental module can collapse repeated rows per `Sample Number` (averaging spectral scans while requiring invariant targets and metadata) and estimate paired depth contrasts by resampling whole profiles. This latter analysis is conditional: `Amostra` is a candidate cluster identifier and must be confirmed against field/laboratory records before its bootstrap interval is interpreted inferentially.
 
 ## Citation and provenance
 
@@ -65,7 +72,7 @@ A license has not yet been specified. Until one is added, reuse and redistributi
 
 ```bash
 python -m venv .venv
-# Windows: .venv\Scripts\activate
+# Windows: .venv\\Scripts\\activate
 # macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev]"
 pytest
@@ -80,4 +87,17 @@ from carbonapp.evaluation import grouped_oof_evaluation
 df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
 results = grouped_oof_evaluation(df, target="TOC", n_splits=5)
 print(results["metrics"])
+```
+
+Run the exploratory sampling-design audit and paired contrast:
+
+```python
+from carbonapp.data import load_dataset
+from carbonapp.experimental import audit_sample_structure, paired_depth_bootstrap
+
+df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
+print(audit_sample_structure(df))
+# Only after verifying that "Amostra" is the independent profile/cluster:
+contrast = paired_depth_bootstrap(df, target="TOC", depth_a="A", depth_b="I")
+print(contrast)
 ```
