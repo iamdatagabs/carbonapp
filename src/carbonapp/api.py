@@ -44,13 +44,15 @@ def create_app(data_path: str | Path | None = None):
     @app.get("/api/v1/dataset/summary")
     def summary(target: str = Query(default="TOC", pattern="^(TOC|N)$")):
         frame = dataset()
+        profile_summary = build_profile_summary(frame, target)
+        profile_records = profile_summary.astype(object).where(pd.notna(profile_summary), None).to_dict(orient="records")
         return {
             "n_rows": int(len(frame)),
             "n_points": int(frame["Amostra"].nunique()),
             "n_sample_numbers": int(frame["Sample Number"].nunique()),
             "n_spectral_bands": int(len([c for c in frame.columns if c.startswith("r") and c[1:].isdigit()])),
             "target": target,
-            "profile_summary": build_profile_summary(frame, target).astype(object).where(pd.notna(build_profile_summary(frame, target)), None).to_dict(orient="records"),
+            "profile_summary": profile_records,
         }
 
     @app.get("/api/v1/profiles/{point_id}")
