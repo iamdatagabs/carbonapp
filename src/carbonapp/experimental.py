@@ -90,6 +90,8 @@ def aggregate_replicate_rows(
     missing = [column for column in required if column not in frame]
     if missing:
         raise ValueError(f"Missing columns: {', '.join(missing)}")
+    if frame[[replicate_column, profile_column, depth_column]].isna().any().any():
+        raise ValueError("Replicate, profile, and depth identifiers cannot be missing")
 
     invariant = [profile_column, depth_column, "TOC", "N"]
     counts = frame.groupby(replicate_column)[invariant].nunique(dropna=False)
