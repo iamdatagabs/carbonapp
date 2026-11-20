@@ -1,10 +1,9 @@
-"""Experimental-design audit and cluster-aware paired depth contrasts.
+"""Sampling-point audit and cluster-aware paired depth contrasts.
 
-The field design identifies each sampling point/plot in `Amostra`; `Profundidade`
-identifies the vertical layer (A-I). Thus `Amostra` is the point-level cluster
-identifier and `Profundidade` is the repeated within-point measurement factor.
-`Sample Number` remains the lower-level spectral/laboratory identifier; its
-technical-replicate meaning must still be confirmed.
+`Amostra` identifies the numeric sampling point/plot. `Profundidade` identifies
+the vertical layer (A-I) within that point. `Sample Number` is a lower-level
+spectral/laboratory identifier; its technical-replicate meaning must still be
+confirmed before collapsing repeated rows.
 """
 
 from __future__ import annotations
@@ -25,7 +24,12 @@ def audit_sample_structure(
     depth_column: str = "Profundidade",
     targets: tuple[str, ...] = ("TOC", "N"),
 ) -> dict[str, Any]:
-    """Describe nesting, repeated IDs, and target consistency without inference."""
+    """Describe point-by-depth nesting, repeated IDs, and target consistency.
+
+`Amostra` is the point/plot identifier; `Profundidade` is the within-point
+layer code. Legacy `n_profiles` and `profile_column` keys are retained for
+backward compatibility and refer to points, not separate profile objects.
+"""
     validate_dataset(frame)
     for column in (profile_column, replicate_column, depth_column):
         if column not in frame:
@@ -52,6 +56,7 @@ def audit_sample_structure(
 
     return {
         "n_rows": int(len(frame)),
+        "n_points": int(frame[profile_column].nunique()),
         "n_profiles": int(frame[profile_column].nunique()),
         "n_replicate_ids": int(frame[replicate_column].nunique()),
         "n_replicate_ids_repeated": int((by_replicate.size() > 1).sum()),
@@ -120,13 +125,13 @@ def paired_depth_bootstrap(
     confidence: float = 0.95,
     random_state: int = 42,
 ) -> dict[str, Any]:
-    """Estimate mean paired depth difference by resampling whole profiles.
+    """Estimate paired depth difference by resampling whole sampling points.
 
     Difference is depth_b minus depth_a. Repeated scan rows are first collapsed
-    within Sample Number, then Sample Numbers are averaged within profile/depth.
-    Only profiles observed at both requested depths contribute. The percentile
-    interval resamples profiles as clusters; it is valid only if profile_column
-    identifies the independent sampling unit in the actual study design.
+    within Sample Number, then Sample Numbers are averaged within point/depth.
+    Only points observed at both requested depths contribute. The percentile
+    interval resamples points as clusters; this assumes distinct Amostra IDs
+    are independent sampling units under the actual field design.
     """
     if target not in ("TOC", "N"):
         raise ValueError("target must be 'TOC' or 'N'")
@@ -172,7 +177,9 @@ def paired_depth_bootstrap(
         "depth_b_interval_cm": [
             DEPTH_BY_CODE[depth_b].top_cm, DEPTH_BY_CODE[depth_b].bottom_cm
         ],
+        "point_column": profile_column,
         "profile_column": profile_column,
+        "n_paired_points": int(len(differences)),
         "n_paired_profiles": int(len(differences)),
         "mean_paired_difference": float(np.mean(differences)),
         "median_paired_difference": float(np.median(differences)),
@@ -180,10 +187,10 @@ def paired_depth_bootstrap(
         "bootstrap_ci": [float(lower), float(upper)],
         "n_bootstrap": int(n_bootstrap),
         "random_state": int(random_state),
-        "resampling_unit": profile_column,
+        "resampling_unit": f"sampling point ({profile_column})",
         "interpretation": (
-            "Exploratory cluster-bootstrap interval. Treat as confirmatory only "
-            "if the selected profile column is verified as the independent "
-            "sampling unit and the sampling design supports this contrast."
+            "Exploratory point-cluster bootstrap interval. Treat as confirmatory only "
+            "if distinct sampling points are independent units and the "
+            "sampling design supports this contrast."
         ),
     }
