@@ -15,6 +15,7 @@ def create_app(data_path: str | Path | None = None):
     """Create the API; dataset loading is lazy so health checks work without data."""
     try:
         from fastapi import FastAPI, HTTPException, Query
+        from fastapi.middleware.cors import CORSMiddleware
     except ImportError as exc:
         raise ImportError("Install API dependencies with: pip install -e '.[api]'") from exc
 
@@ -24,6 +25,13 @@ def create_app(data_path: str | Path | None = None):
         version="0.1.0",
         description="Reproducible soil NIR spectroscopy, statistics and vertical-profile endpoints.",
     )
+
+    cors_origins = [origin.strip() for origin in os.getenv("CARBONAPP_CORS_ORIGINS", "").split(",") if origin.strip()]
+    if cors_origins:
+        app.add_middleware(
+            CORSMiddleware, allow_origins=cors_origins, allow_credentials=False,
+            allow_methods=["GET"], allow_headers=["*"],
+        )
 
     def dataset():
         if not resolved_path.exists():
