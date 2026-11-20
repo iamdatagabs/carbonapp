@@ -30,7 +30,7 @@ def run(data_path, output_dir, seed=42, outer_splits=5, inner_splits=4,
                     else result["n_window_bands"],
                 "delta_rmse_vs_baseline": item["delta_vs_layer_baseline"]["rmse"],
                 "delta_mae_vs_baseline": item["delta_vs_layer_baseline"]["mae"],
-                "selected_models": json.dumps(item["selected_model_counts")})
+                "selected_models": json.dumps(item["selected_model_counts"])})
     summary = pd.DataFrame(rows)
     summary.to_csv(output_dir / "band-window-benchmark-summary.csv", index=False)
     return summary
