@@ -121,3 +121,21 @@ print(by_sampling_point["ranking_by_rmse"])
 ```
 
 Use `target="N"` only as an explicitly exploratory experiment until its laboratory reference method, units and provenance are verified. See `docs/model-comparison-protocol.md` before interpreting rankings.
+
+For an estimate that accounts for choosing among candidate model families,
+use nested grouped CV:
+
+```python
+from carbonapp.model_comparison import nested_grouped_model_selection
+
+nested = nested_grouped_model_selection(
+    df, target="TOC", group_column="Sample Number",
+    outer_splits=5, inner_splits=4
+)
+print(nested["metrics"])
+print(nested["selected_model_counts"])
+```
+
+The outer folds estimate the model-selection procedure; they are not a score
+for a final model refitted on all observations. See the model-comparison
+protocol for interpretation and the stricter point-held-out analysis.
