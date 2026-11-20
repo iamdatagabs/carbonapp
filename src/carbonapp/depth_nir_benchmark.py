@@ -13,7 +13,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from .data import spectral_columns, validate_dataset
-from .depth import DEPTH_BY_CODE
 from .preprocessing import build_preprocessor
 
 SCENARIOS = {
@@ -97,10 +96,12 @@ def nested_depth_nir_benchmark(frame, group_column="Amostra", outer_splits=5,
         baseline[test] = float(y_train.mean())
 
         for scenario in SCENARIOS:
-            n_features = len(bands) if scenario == "depth_only" else (
-                len(bands) + frame["Profundidade"].nunique()
-                if "plus_depth" in scenario else len(bands)
-            )
+            if scenario == "depth_only":
+                n_features = int(frame["Profundidade"].nunique())
+            elif "plus_depth" in scenario:
+                n_features = len(bands) + int(frame["Profundidade"].nunique())
+            else:
+                n_features = len(bands)
             selected_k = min(k, n_features)
             scores = {}
             for model in models:
