@@ -1,0 +1,75 @@
+name: Real-data research pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      splits:
+        description: "Outer grouped-CV folds (minimum 3)"
+        required: false
+        default: "5"
+      seed:
+        description: "Reproducibility seed"
+        required: false
+        default: "42"
+  push:
+    branches: [fix/ci-onnx-profile]
+    paths:
+      - "src/**"
+      - "scripts/run_research_pipeline.py"
+      - "data/raw/**"
+      - ".github/workflows/real-data-research.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: carbonapp-real-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install research runtime
+        run: pip install -e ".[dev,api,tinyml]"
+      - name: Validate source dataset and run research pipeline
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import pandas as pd
+
+          path = Path("data/raw/[quad]base_nirs_refletancia.csv")
+          if not path.is_file():
+              raise SystemExit(f"Dataset not found in repository: {path}")
+          frame = pd.read_csv(path)
+          print({
+              "path": str(path),
+              "bytes": path.stat().st_size,
+              "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+              "rows": len(frame),
+              "columns": len(frame.columns),
+              "targets": [c for c in ("TOC", "N") if c in frame.columns],
+          })
+          PY
+          python scripts/run_research_pipeline.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/latest-run \
+            --seed "${{ inputs.seed || '42' }}" \
+            --splits "${{ inputs.splits || '5' }}"
+      - name: Upload reproducible research artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: carbonapp-real-data-research-${{ github.run_number }}
+          path: reports/latest-run/
+          if-no-files-found: warn
+          retention-days: 30
