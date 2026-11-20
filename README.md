@@ -58,7 +58,7 @@ The repository includes a spectral dataset with:
 
 The `research/reproducible-core` branch contains the audit, data dictionary, authoritative depth metadata, dataset validation, grouped Huber baseline, descriptive statistics, sampling-design audit and an exploratory paired depth bootstrap. The original notebooks are retained as historical research artifacts; their evaluation procedures require revision before their scores can be treated as unbiased estimates.
 
-The grouped evaluator keeps repeated `Sample Number` observations in the same GroupKFold fold and fits scaling and feature selection inside each fold. The experimental module can collapse repeated rows per `Sample Number` (averaging spectral scans while requiring invariant targets and metadata) and estimate paired depth contrasts by resampling whole profiles. This latter analysis is conditional: `Amostra` is a candidate cluster identifier and must be confirmed against field/laboratory records before its bootstrap interval is interpreted inferentially.
+The grouped evaluator keeps repeated `Sample Number` observations in the same GroupKFold fold and fits scaling and feature selection inside each fold. The experimental module can collapse repeated rows per `Sample Number` (averaging spectral scans while requiring invariant targets and metadata) and estimate paired depth contrasts by resampling whole sampling points/plots. `Amostra` identifies the point/plot; `Profundidade` identifies the repeated layer within that point. The technical-replicate interpretation of `Sample Number` still requires confirmation before aggregation.
 
 ## Citation and provenance
 
