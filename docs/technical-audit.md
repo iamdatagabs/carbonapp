@@ -101,3 +101,19 @@ A correspondência entre A–I e os intervalos físicos de profundidade deve ser
 - [ ] Confirmar se a base quadrática é a mesma usada nos resultados publicados.
 - [ ] Reproduzir os resultados originais com protocolo de validação documentado.
 - [ ] Implementar testes de integridade e contrato de dados.
+
+
+## 7. Estrutura de repetição e agrupamento (verificação adicional)
+
+A inspeção dos identificadores encontrou 224 valores únicos em `Sample Number` para 266 linhas. A multiplicidade é:
+- 189 identificadores aparecem uma vez;
+- 28 identificadores aparecem duas vezes;
+- 7 identificadores aparecem três vezes.
+
+Nas 224 unidades identificadas por `Sample Number`, os valores de TOC e N são constantes entre as linhas repetidas. Isso é compatível com medições espectrais replicadas associadas ao mesmo resultado de referência, mas a natureza exata da repetição deve ser confirmada no protocolo experimental.
+
+**Implicação metodológica crítica:** todas as linhas com o mesmo `Sample Number` devem permanecer no mesmo grupo durante a separação treino/teste e a validação cruzada. Caso contrário, réplicas espectrais associadas ao mesmo valor laboratorial podem aparecer simultaneamente no treino e no teste, causando vazamento entre partições. A validação inicial deve usar divisão agrupada por `Sample Number` (por exemplo, GroupKFold ou GroupShuffleSplit), com a escolha final condicionada ao desenho experimental.
+
+Também foram observados 28 valores únicos em `Amostra` e 224 combinações únicas `Amostra × Profundidade`. A semântica dos identificadores e sua relação com o plano amostral ainda precisa ser confirmada.
+
+A correlação de Pearson bruta entre TOC e N nesta base é aproximadamente 0,9351. Isso é uma descrição exploratória da base, não evidência de que um alvo possa substituir o outro nem de que ambos tenham o mesmo processo de referência.
