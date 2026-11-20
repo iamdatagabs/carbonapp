@@ -2,7 +2,18 @@
 
 A reproducible research codebase for near-infrared (NIR) soil spectroscopy, prediction of total organic carbon (TOC), exploratory nitrogen analysis, uncertainty estimation, spectral interpretability, compact model export and interactive vertical-profile exploration.
 
-The original research notebooks and source data are preserved. New engineering work lives in the `research/reproducible-core` branch until it has passed automated validation and scientific review.
+The original research notebooks and source data are preserved. New engineering work lives in `research/reproducible-core` branch until it has passed automated validation and scientific review.
+
+## Product applications (MVP)
+
+The product foundation is being developed alongside the research core:
+- **Web:** `apps/web/` — responsive field-capture console connected to Java API; `apps/frontend/` remains the research dashboard with vertical and categorical 3D profile exploration.
+- **Backend:** `apps/backend/` — Java 21 / Spring Boot REST API, PostgreSQL persistence and versioned endpoints.
+- **Android:** `apps/mobile/` — Kotlin + Jetpack Compose field-capture prototype.
+- **Architecture and roadmap:** [docs/application-architecture.md](docs/application-architecture.md).
+- **API contract:** [docs/openapi-v1.yaml](docs/openapi-v1.yaml).
+
+The first Android save action is an in-memory draft, not durable offline storage. The backend is a development scaffold and is not ready for public exposure: authentication, authorization, migration-managed schema and idempotent synchronization remain future work. The scientific Python package remains responsible for model training and inference.
 
 ## Dataset and scientific scope
 
@@ -33,6 +44,7 @@ The initial static audit of `data/raw/[quad]base_nirs_refletancia.csv` recorded 
 | `evaluation.py`, `model_comparison.py` | Leakage-aware pipelines, grouped OOF comparison and nested grouped model selection |
 | `uncertainty.py` | Group split-conformal prediction intervals |
 | `interpretability.py` | Feature-selection stability, group-held-out permutation importance, optional SHAP and depth-stratified analysis |
+| `stability.py` | Repeated grouped band-selection stability after training-only depth centering |
 | `profile.py` | Point-aware profile aggregation, equal-point summaries and 3D-ready payload |
 | `tinyml.py` | Linear ONNX export, dynamic INT8 quantization, prediction-drift comparison and host benchmarks |
 | `api.py` | Optional FastAPI endpoints for metadata, dataset summary and vertical profiles |
@@ -79,23 +91,23 @@ from carbonapp.interpretability import (
 from carbonapp.profile import build_profile_summary, build_profile_3d_payload
 
 df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
-
-# Final selection-procedure estimate; repeat with group_column="Amostra".
 nested = nested_grouped_model_selection(
     df, target="TOC", group_column="Sample Number",
     outer_splits=5, inner_splits=4,
 )
 print(nested["metrics"])
-
 stability = feature_selection_stability(df, target="TOC")
 permutation = grouped_permutation_importance(df, target="TOC")
 by_depth = depth_stratified_importance(df, target="TOC")
-
 profile_summary = build_profile_summary(df, target="TOC")
 profile_3d = build_profile_3d_payload(df, target="TOC")
 ```
 
-For SHAP, use `grouped_shap_explanation` after installing the `explainability` extra. See `docs/model-comparison-protocol.md`, `docs/uncertainty-methodology.md` and `docs/interpretability-protocol.md`.
+Repeated within-depth band stability:
+```bash
+python scripts/run_band_stability.py --resamples 100 --seed 42
+```
+See [docs/band-stability-protocol.md](docs/band-stability-protocol.md).
 
 ## End-to-end reproducible run
 
@@ -110,28 +122,20 @@ The runner writes a dataset hash manifest, nested grouped CV at reference and po
 
 ## API and interactive dashboard
 
-Install the API extra and start the service:
+Install the Python API extra and start the research API:
 
 ```bash
 pip install -e ".[api]"
 uvicorn carbonapp.api:create_app --factory --reload
 ```
 
-The API defaults to `data/raw/[quad]base_nirs_refletancia.csv`. Override with `CARBONAPP_DATA_PATH`. Serve `apps/frontend/index.html` over HTTP to open the dashboard. For a separate frontend origin, set `window.CARBONAPP_API_BASE` before `app.js` and configure the API allowlist:
+Serve `apps/frontend/index.html` over HTTP to open the dashboard. For a separate frontend origin, set `window.CARBONAPP_API_BASE` before `app.js` and configure the API allowlist.
 
+The new Java API is a separate product backend:
 ```bash
-CARBONAPP_CORS_ORIGINS=https://your-static-site.example
+docker compose up --build
 ```
-
-Endpoints:
-
-- `GET /health`
-- `GET /api/v1/metadata/depths`
-- `GET /api/v1/dataset/summary?target=TOC|N`
-- `GET /api/v1/profiles/{point_id}?target=TOC|N`
-- `GET /api/v1/profiles-3d?target=TOC|N`
-
-See `docs/api-and-frontend.md` for setup and deployment boundaries.
+See `apps/backend/README.md` and `apps/mobile/README.md`. Do not expose the development API publicly until authentication, authorization and production database migrations are implemented.
 
 ## TinyML workflow
 
@@ -144,7 +148,6 @@ from carbonapp.tinyml import (
     export_linear_pipeline_onnx, quantize_onnx_dynamic,
     compare_onnx_models, benchmark_onnx_model,
 )
-
 df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
 bands = spectral_columns(df)
 model = build_model_pipeline("huber", k=40).fit(df[bands], df["TOC"])
@@ -159,9 +162,12 @@ This snippet illustrates the API only; final artifacts must be trained under the
 ## Repository structure
 
 - `data/raw/`: original research data
-- `docs/`: dissertation, audits and scientific protocols
+- `docs/`: dissertation, audits, scientific protocols and product architecture
 - `src/carbonapp/`: reusable scientific and API modules
-- `apps/frontend/`: static interactive dashboard
+- `apps/frontend/`: static interactive research dashboard
+- `apps/web/`: responsive field-capture web MVP
+- `apps/backend/`: Java Spring Boot product API
+- `apps/mobile/`: Kotlin Android field-capture MVP
 - `tests/`: automated tests
 - `models/`, `reports/`, `experiments/`: reserved for versioned outputs and artifacts
 - `notebooks/`: historical and exploratory notebooks

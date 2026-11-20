@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: CarbonApp API
+  version: 1.0.0
+  description: MVP contract for field capture and soil-depth metadata.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/health:
+    get:
+      summary: Service health
+      responses:
+        "200": { description: Service is healthy }
+  /api/v1/metadata/depths:
+    get:
+      summary: Authoritative soil depth intervals
+      responses:
+        "200": { description: Depth intervals A through I }
+  /api/v1/field-records:
+    get:
+      summary: List field records
+      responses:
+        "200": { description: Field records }
+    post:
+      summary: Create a field record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FieldRecordRequest" }
+      responses:
+        "201": { description: Created }
+        "400": { description: Validation error }
+components:
+  schemas:
+    FieldRecordRequest:
+      type: object
+      required: [projectCode, pointCode, depthCode]
+      properties:
+        projectCode: { type: string, maxLength: 80 }
+        pointCode: { type: string, maxLength: 80 }
+        depthCode: { type: string, enum: [A, B, C, D, E, F, G, H, I] }
+        notes: { type: string, maxLength: 2000 }

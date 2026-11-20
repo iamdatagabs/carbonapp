@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="CarbonApp — registro de campo para pesquisa de solos."><title>CarbonApp | Caderno de campo</title><link rel="stylesheet" href="./styles.css"></head>
+<body><header class="hero"><div class="eyebrow">CarbonApp · Pesquisa de solos</div><h1>Caderno de campo</h1><p>Registre pontos de amostragem, camadas e observações da campanha.</p></header>
+<main><section class="layout">
+<form id="record-form" class="panel"><h2>Novo registro</h2>
+<label>Projeto<input name="projectCode" maxlength="80" value="DEMO" required></label>
+<label>Ponto de amostragem<input name="pointCode" maxlength="80" placeholder="Ex.: P01" required></label>
+<label>Camada de profundidade<select name="depthCode" required>
+<option value="A">A · 0–10 cm</option><option value="B">B · 10–20 cm</option><option value="C">C · 20–40 cm</option><option value="D">D · 40–60 cm</option><option value="E">E · 60–80 cm</option><option value="F">F · 80–100 cm</option><option value="G">G · 100–130 cm</option><option value="H">H · 130–160 cm</option><option value="I">I · 160–200 cm</option></select></label>
+<label>Observações<textarea name="notes" rows="4" maxlength="2000" placeholder="Condições de coleta, identificação, ocorrências…"></textarea></label>
+<button type="submit">Registrar no servidor</button><p id="form-status" role="status" class="status">Conectando à API…</p></form>
+<section class="panel"><div class="list-head"><div><h2>Registros recentes</h2><p class="muted">Dados persistidos no backend Java.</p></div><button id="refresh" class="secondary" type="button">Atualizar</button></div><div id="records" class="records"><p class="muted">Carregando registros…</p></div></section>
+</section><p class="notice">Protótipo de desenvolvimento. Não inclua dados pessoais ou sensíveis. Autenticação, autorização, trilha de auditoria e sincronização offline ainda não estão implementadas.</p></main><script src="./app.js"></script></body></html>
