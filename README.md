@@ -139,3 +139,25 @@ print(nested["selected_model_counts"])
 The outer folds estimate the model-selection procedure; they are not a score
 for a final model refitted on all observations. See the model-comparison
 protocol for interpretation and the stricter point-held-out analysis.
+
+## Group-aware prediction intervals
+
+```python
+from carbonapp.uncertainty import grouped_split_conformal
+
+# Use Sample Number for scan/reference grouping, then repeat with Amostra
+# for a stricter point-held-out transfer assessment.
+intervals = grouped_split_conformal(
+    df, target="TOC", group_column="Sample Number",
+    model_name="huber", alpha=0.10
+)
+print(intervals["metrics"])
+print(intervals["n_calibration_groups"], intervals["quantile"])
+```
+
+Calibration and test partitions are disjoint at the group level. The conformal
+quantile uses the maximum absolute residual per calibration group, targeting
+simultaneous within-group coverage under exchangeability of independent groups.
+If the calibration partition has too few groups for the requested coverage,
+the interval is infinite by the finite-sample rule; do not replace it with an
+arbitrary percentile. See `docs/uncertainty-methodology.md`.
