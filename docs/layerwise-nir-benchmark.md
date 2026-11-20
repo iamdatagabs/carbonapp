@@ -17,8 +17,8 @@ observations from a sampling point remain in one fold.
 
 Within each outer fold, the baseline is the mean TOC in that layer calculated
 from training points only. NIR models are trained to predict deviations from
-that mean. Model and preprocessing selection occur inside grouped inner folds.
-Raw spectra and Savitzky–Golay first derivatives are compared.
+that mean. Model and preprocessing selection occur inside grouped inner
+folds. Raw spectra and Savitzky–Golay first derivatives are compared.
 
 ## Interpretation limits
 
@@ -27,3 +27,12 @@ comparisons are exploratory and subject to substantial uncertainty and
 multiple-comparison effects. A favorable layer does not constitute validation
 of a general NIR method, prove chemical specificity, or establish external
 validity. TOC units and laboratory reference method remain to be confirmed.
+
+## Results
+
+The current run's pooled out-of-fold metrics and interpretation are documented
+in [Layer-wise NIR benchmark — results](layerwise-nir-results.md). In brief,
+raw NIR reduced RMSE versus the layer-specific mean baseline only in layer B,
+by approximately 1.2%; the first derivative did not improve RMSE in any layer.
+These are exploratory results from small per-layer samples, not a validated
+calibration.
