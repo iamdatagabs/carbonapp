@@ -39,9 +39,9 @@ The repository includes a spectral dataset with:
 2. **Descriptive and inferential statistics:** distributions, associations, uncertainty and group-aware comparisons.
 3. **Machine learning:** reproducible baselines and model comparisons for TOC and N, with preprocessing and feature selection inside cross-validation.
 4. **Probabilistic evaluation:** prediction intervals, calibration and uncertainty analysis.
-5. **TinyML:** compact models, quantization and measurements of latency, memory and model size after scientific validation.
-6. **Soil visualization:** interactive vertical profiles linked to verified depth intervals; spatial 3D only when spatial coordinates support it.
-7. **Web platform:** interactive scientific dashboards and reproducible reports.
+5. **Interpretability:** fold-wise feature-selection stability, group-held-out permutation importance, optional SHAP and depth-stratified analyses.\n6. **TinyML:** compact models, quantization and measurements of latency, memory and model size after scientific validation.
+7. **Soil visualization:** interactive vertical profiles linked to verified depth intervals; spatial 3D only when spatial coordinates support it.
+8. **Web platform:** interactive scientific dashboards and reproducible reports.
 
 ## Methodological principles
 
