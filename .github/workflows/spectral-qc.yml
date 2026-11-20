@@ -2,11 +2,22 @@ name: Spectral quality audit
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/raw/**"
+      - "scripts/audit_spectral_data.py"
+      - "scripts/review_spectral_repeats.py"
+      - "tests/test_spectral_repeat_review.py"
+      - "src/carbonapp/data.py"
+      - ".github/workflows/spectral-qc.yml"
   push:
     branches: [main]
     paths:
       - "data/raw/**"
       - "scripts/audit_spectral_data.py"
+      - "scripts/review_spectral_repeats.py"
+      - "tests/test_spectral_repeat_review.py"
       - "src/carbonapp/data.py"
       - ".github/workflows/spectral-qc.yml"
 
@@ -33,6 +44,11 @@ jobs:
       - name: Audit original NIR spectra
         run: |
           python scripts/audit_spectral_data.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/spectral-qc
+      - name: Review repeated spectra and smoothness candidates
+        run: |
+          python scripts/review_spectral_repeats.py \
             --data "data/raw/[quad]base_nirs_refletancia.csv" \
             --output reports/spectral-qc
       - name: Upload spectral QC report
