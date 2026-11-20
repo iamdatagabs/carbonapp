@@ -27,18 +27,25 @@ Cada coluna `rXXXX` representa uma leitura espectral associada ao comprimento de
 
 Os valores são numéricos decimais. A interpretação exata (refletância, transformação, correção, escala e unidade instrumental) deve ser confirmada com o protocolo de aquisição e o histórico de processamento. O nome do arquivo contém `[quad]`, mas isso, isoladamente, não documenta a operação matemática aplicada.
 
-## Profundidade do solo — informação metodológica confirmada
+## Profundidade do solo — intervalos físicos confirmados
 
-O experimento abrange um perfil vertical de solo de **0 a 200 cm (2 m)** e utiliza nove classes/códigos de profundidade (A–I). As camadas não devem ser presumidas como tendo espessuras iguais: segundo a informação metodológica confirmada pelo autor, as camadas superficiais têm aproximadamente 10–20 cm, enquanto a camada mais profunda tem espessura próxima de 90 cm.
+O experimento abrange um perfil vertical de solo de **0 a 200 cm (2 m)**, dividido em nove camadas de espessuras variáveis. O autor confirmou a correspondência exata entre os códigos do CSV e os intervalos físicos:
 
-A tabela exata que associa cada código A–I aos limites superior e inferior em centímetros ainda precisa ser transcrita da dissertação. Portanto:
+| Código | Limite superior (cm) | Limite inferior (cm) | Espessura (cm) |
+|---|---:|---:|---:|
+| A | 0 | 10 | 10 |
+| B | 10 | 20 | 10 |
+| C | 20 | 40 | 20 |
+| D | 40 | 60 | 20 |
+| E | 60 | 80 | 20 |
+| F | 80 | 100 | 20 |
+| G | 100 | 130 | 30 |
+| H | 130 | 160 | 30 |
+| I | 160 | 200 | 40 |
 
-- não converter A–I em números ordinais para análise;
-- não assumir que A corresponde à superfície ou que a ordem alfabética representa a ordem vertical;
-- não atribuir espessuras exatas a cada classe com base apenas nas aproximações acima;
-- manter a geometria vertical do perfil parametrizada pelos limites reais de cada camada assim que a tabela for recuperada.
+A profundidade é uma variável categórica no CSV, mas possui uma ordem física conhecida. A aplicação deve manter a categoria original (A–I) e associar cada código aos limites numéricos acima por meio de um dicionário explícito, sem depender da ordenação alfabética implícita.
 
-Para a visualização 3D, representar as nove camadas com suas espessuras reais, e não como nove blocos de mesma altura. Até a transcrição da tabela, a interface deve identificar os limites como pendentes e não apresentar uma escala vertical quantitativa enganosa.
+Para visualizações do perfil, usar os limites reais das camadas e respeitar as espessuras desiguais. A profundidade pode ser representada no eixo vertical (0 cm na superfície e 200 cm na base); não interpolar nem sugerir continuidade espacial lateral sem dados que sustentem essa operação.
 
 ## Distribuição observada dos códigos de profundidade
 
