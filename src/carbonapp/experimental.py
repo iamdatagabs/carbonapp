@@ -1,8 +1,10 @@
 """Experimental-design audit and cluster-aware paired depth contrasts.
 
-The profile/cluster identifier is explicit because its scientific meaning must
-be confirmed from field metadata. The default 'Amostra' is a candidate grouping,
-not an assertion that these records are independent biological profiles.
+The field design identifies each sampling point/plot in `Amostra`; `Profundidade`
+identifies the vertical layer (A-I). Thus `Amostra` is the point-level cluster
+identifier and `Profundidade` is the repeated within-point measurement factor.
+`Sample Number` remains the lower-level spectral/laboratory identifier; its
+technical-replicate meaning must still be confirmed.
 """
 
 from __future__ import annotations
