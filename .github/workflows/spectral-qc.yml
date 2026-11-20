@@ -1,0 +1,60 @@
+name: Spectral quality audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/raw/**"
+      - "scripts/audit_spectral_data.py"
+      - "scripts/review_spectral_repeats.py"
+      - "tests/test_spectral_repeat_review.py"
+      - "src/carbonapp/data.py"
+      - ".github/workflows/spectral-qc.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/raw/**"
+      - "scripts/audit_spectral_data.py"
+      - "scripts/review_spectral_repeats.py"
+      - "tests/test_spectral_repeat_review.py"
+      - "src/carbonapp/data.py"
+      - ".github/workflows/spectral-qc.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  spectral-qc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,api]"
+      - name: Run tests
+        run: pytest -q
+      - name: Audit original NIR spectra
+        run: |
+          python scripts/audit_spectral_data.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/spectral-qc
+      - name: Review repeated spectra and smoothness candidates
+        run: |
+          python scripts/review_spectral_repeats.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/spectral-qc
+      - name: Upload spectral QC report
+        uses: actions/upload-artifact@v4
+        with:
+          name: carbonapp-spectral-qc-${{ github.run_number }}
+          path: reports/spectral-qc/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,73 @@
+name: NIR preprocessing comparison
+
+on:
+  workflow_dispatch:
+    inputs:
+      outer_splits:
+        description: Outer grouped folds
+        required: true
+        default: "5"
+        type: string
+      inner_splits:
+        description: Inner grouped folds
+        required: true
+        default: "4"
+        type: string
+      seed:
+        description: Random seed
+        required: true
+        default: "42"
+        type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/carbonapp/preprocessing.py"
+      - "src/carbonapp/preprocessing_comparison.py"
+      - "scripts/run_preprocessing_comparison.py"
+      - "tests/test_preprocessing_comparison.py"
+      - ".github/workflows/preprocessing-comparison.yml"
+      - "data/raw/**"
+  push:
+    branches: [main]
+    paths:
+      - "src/carbonapp/preprocessing.py"
+      - "src/carbonapp/preprocessing_comparison.py"
+      - "scripts/run_preprocessing_comparison.py"
+      - "tests/test_preprocessing_comparison.py"
+      - ".github/workflows/preprocessing-comparison.yml"
+      - "data/raw/**"
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install project
+        run: pip install -e ".[dev,api]"
+      - name: Run tests
+        run: pytest -q
+      - name: Run nested grouped preprocessing comparison
+        run: |
+          python scripts/run_preprocessing_comparison.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
+            --output reports/preprocessing-comparison \
+            --seed "${{ inputs.seed || '42' }}" \
+            --outer-splits "${{ inputs.outer_splits || '5' }}" \
+            --inner-splits "${{ inputs.inner_splits || '4' }}"
+      - name: Upload comparison outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: carbonapp-preprocessing-comparison-${{ github.run_number }}
+          path: reports/preprocessing-comparison/
+          if-no-files-found: error
+          retention-days: 30
