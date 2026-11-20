@@ -27,7 +27,7 @@ The repository includes a spectral dataset with:
 | `src/carbonapp/data.py` | Dataset schema validation and spectral-band discovery |
 | `src/carbonapp/statistics.py` | Descriptive statistics, spectral summaries and exploratory associations |
 | `src/carbonapp/experimental.py` | Sampling-design audit, replicate aggregation and paired cluster bootstrap |
-| `src/carbonapp/evaluation.py` | GroupKFold evaluation with preprocessing inside each fold |
+| `src/carbonapp/evaluation.py` | GroupKFold Huber baseline with fold-local preprocessing |\n| `src/carbonapp/model_comparison.py` | Grouped OOF comparison: Huber, Extra Trees, Elastic Net and Bayesian Ridge |\n| `docs/model-comparison-protocol.md` | Grouping strategy, model comparison and selection caveats |
 | `tests/` | Unit tests for depth, statistics and experimental-design functions |
 | `pyproject.toml` | Python package and development dependencies |
 | `Filtro_Carbono.ipynb` | Original filter-based feature-selection experiments |
@@ -58,7 +58,7 @@ The repository includes a spectral dataset with:
 
 The `research/reproducible-core` branch contains the audit, data dictionary, authoritative depth metadata, dataset validation, grouped Huber baseline, descriptive statistics, sampling-design audit and an exploratory paired depth bootstrap. The original notebooks are retained as historical research artifacts; their evaluation procedures require revision before their scores can be treated as unbiased estimates.
 
-The grouped evaluator keeps repeated `Sample Number` observations in the same GroupKFold fold and fits scaling and feature selection inside each fold. The experimental module can collapse repeated rows per `Sample Number` (averaging spectral scans while requiring invariant targets and metadata) and estimate paired depth contrasts by resampling whole sampling points/plots. `Amostra` identifies the point/plot; `Profundidade` identifies the repeated layer within that point. The technical-replicate interpretation of `Sample Number` still requires confirmation before aggregation.
+The grouped evaluators keep repeated `Sample Number` observations in the same GroupKFold fold and fit scaling and feature selection inside each fold. The model-comparison module adds Huber, Extra Trees, Elastic Net and Bayesian Ridge, with pooled out-of-fold predictions and R², MAE, RMSE and bias. Run a second analysis grouped by `Amostra` to assess transfer to unseen sampling points. Candidate rankings are exploratory; final selected-model performance requires nested grouped CV or an untouched grouped test set. The experimental module can collapse repeated rows per `Sample Number` (averaging spectral scans while requiring invariant targets and metadata) and estimate paired depth contrasts by resampling whole sampling points/plots. `Amostra` identifies the point/plot; `Profundidade` identifies the repeated layer within that point. The technical-replicate interpretation of `Sample Number` still requires confirmation before aggregation.
 
 ## Citation and provenance
 
@@ -101,3 +101,23 @@ print(audit_sample_structure(df))
 contrast = paired_depth_bootstrap(df, target="TOC", depth_a="A", depth_b="I")
 print(contrast)
 ```
+
+## Compare candidate models
+
+```python
+from carbonapp.data import load_dataset
+from carbonapp.model_comparison import compare_grouped_models
+
+df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
+
+# Keep repeated sample/reference identifiers together.
+by_reference = compare_grouped_models(df, target="TOC", group_column="Sample Number", n_splits=5)
+
+# Hold out complete sampling points/parcels for a stricter transfer analysis.
+by_sampling_point = compare_grouped_models(df, target="TOC", group_column="Amostra", n_splits=5)
+
+print(by_reference["ranking_by_rmse"])
+print(by_sampling_point["ranking_by_rmse"])
+```
+
+Use `target="N"` only as an explicitly exploratory experiment until its laboratory reference method, units and provenance are verified. See `docs/model-comparison-protocol.md` before interpreting rankings.
