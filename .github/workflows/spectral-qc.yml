@@ -39,8 +39,8 @@ jobs:
             --output reports/spectral-qc
       - name: Review repeated spectra and smoothness candidates
         run: |
-          python scripts/review_spectral_repeats.py \\
-            --data "data/raw/[quad]base_nirs_refletancia.csv" \\
+          python scripts/review_spectral_repeats.py \
+            --data "data/raw/[quad]base_nirs_refletancia.csv" \
             --output reports/spectral-qc
       - name: Upload spectral QC report
         uses: actions/upload-artifact@v4
