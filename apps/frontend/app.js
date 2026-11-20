@@ -70,7 +70,7 @@
         margin: {l: 0, r: 0, t: 8, b: 0},
         scene: {
           xaxis: {title: "Ponto (índice categórico)", tickmode: "array", tickvals: ids.map((_,i)=>i), ticktext: ids},
-          yaxis: {title: selectedTarget}, zaxis: {title: "Profundidade (cm)", autorange: "reversed"},
+          yaxis: {title: selectedTarget}, zaxis: {title: "Profundidade (cm)"},
           aspectmode: "manual", aspectratio: {x: 1.4, y: 1, z: 1.5}
         }, paper_bgcolor: "rgba(0,0,0,0)", font: {color: "#26352d"}
       }, {responsive: true, displayModeBar: false});
