@@ -15,11 +15,11 @@ def _point_depth_table(frame: pd.DataFrame, point_column: str = "Amostra") -> pd
     if missing:
         raise ValueError(f"Missing profile columns: {sorted(missing)}")
     # A repeated Sample Number must remain one reference value within one point/layer.
-    invariants = frame.groupby(["Amostra", "Profundidade", "Sample Number"])[["TOC", "N"]].nunique(dropna=False)
+    invariants = frame.groupby([point_column, "Profundidade", "Sample Number"])[["TOC", "N"]].nunique(dropna=False)
     if (invariants > 1).any().any():
         raise ValueError("TOC/N must be invariant within each point-depth-Sample Number group")
     # A Sample Number should not identify multiple point/layer combinations.
-    sample_locations = frame.groupby("Sample Number")[["Amostra", "Profundidade"]].nunique(dropna=False)
+    sample_locations = frame.groupby("Sample Number")[[point_column, "Profundidade"]].nunique(dropna=False)
     if (sample_locations > 1).any().any():
         raise ValueError("Sample Number maps to multiple sampling points or depth layers")
     # First collapse repeated spectral rows sharing a sample/reference identifier.
