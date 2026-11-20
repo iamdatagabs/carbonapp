@@ -21,25 +21,33 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "src/carbonapp/depth_nir_benchmark.py"\n      - "src/carbonapp/within_depth_nir.py"\n      - "scripts/run_within_depth_nir.py"\n      - "tests/test_within_depth_nir.py"\n      - "docs/within-depth-nir-benchmark.md"
+      - "src/carbonapp/depth_nir_benchmark.py"
+      - "src/carbonapp/within_depth_nir.py"
       - "scripts/run_depth_nir_benchmark.py"
+      - "scripts/run_within_depth_nir.py"
       - "src/carbonapp/depth_nir_residual_audit.py"
       - "scripts/run_depth_nir_residual_audit.py"
       - "tests/test_depth_nir_benchmark.py"
+      - "tests/test_within_depth_nir.py"
       - "tests/test_depth_nir_residual_audit.py"
       - "docs/depth-nir-residual-audit.md"
+      - "docs/within-depth-nir-benchmark.md"
       - ".github/workflows/depth-nir-benchmark.yml"
       - "data/raw/**"
   push:
     branches: [main]
     paths:
       - "src/carbonapp/depth_nir_benchmark.py"
+      - "src/carbonapp/within_depth_nir.py"
       - "scripts/run_depth_nir_benchmark.py"
+      - "scripts/run_within_depth_nir.py"
       - "src/carbonapp/depth_nir_residual_audit.py"
       - "scripts/run_depth_nir_residual_audit.py"
       - "tests/test_depth_nir_benchmark.py"
+      - "tests/test_within_depth_nir.py"
       - "tests/test_depth_nir_residual_audit.py"
       - "docs/depth-nir-residual-audit.md"
+      - "docs/within-depth-nir-benchmark.md"
       - ".github/workflows/depth-nir-benchmark.yml"
       - "data/raw/**"
 
@@ -90,6 +98,7 @@ jobs:
           name: carbonapp-depth-nir-benchmark-${{ github.run_number }}
           path: |
             reports/depth-nir-benchmark/
-            reports/depth-nir-residual-audit/\n            reports/within-depth-nir/
+            reports/depth-nir-residual-audit/
+            reports/within-depth-nir/
           if-no-files-found: error
           retention-days: 30
