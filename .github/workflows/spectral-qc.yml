@@ -2,6 +2,15 @@ name: Spectral quality audit
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/raw/**"
+      - "scripts/audit_spectral_data.py"
+      - "scripts/review_spectral_repeats.py"
+      - "tests/test_spectral_repeat_review.py"
+      - "src/carbonapp/data.py"
+      - ".github/workflows/spectral-qc.yml"
   push:
     branches: [main]
     paths:
