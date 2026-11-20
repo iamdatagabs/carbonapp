@@ -15,7 +15,7 @@ def test_within_depth_residual_benchmark_is_grouped_and_returns_complete_predict
                 "Profundidade": layer, "Sample Number": f"{point}-{layer}",
                 "TOC": base + 0.7 * signal + rng.normal(scale=0.1), "N": 0.5,
             }
-            row.update({f"r{1100 + 2*i}": 0.04 + signal * (i + 1) * 0.0001 for i in range(5)})
+            row.update({f"r{1100 + 2*i}": 0.04 + signal * (i + 1) * 0.0001 for i in range(11)})
             rows.append(row)
     frame = pd.DataFrame(rows)
     result = nested_within_depth_nir(
