@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: carbonapp-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/carbonapp}
+    username: ${DATABASE_USERNAME:carbonapp}
+    password: ${DATABASE_PASSWORD:carbonapp}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+server:
+  port: ${PORT:8080}
