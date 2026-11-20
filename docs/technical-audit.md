@@ -96,8 +96,9 @@ A correspondência entre A–I e os intervalos físicos de profundidade deve ser
 ## 6. Próximas verificações
 
 - [ ] Confirmar unidades e métodos de referência de TOC e N.
-- [ ] Confirmar o mapeamento dos códigos A–I para intervalos de profundidade.
-- [ ] Inspecionar duplicatas e estrutura de agrupamento dos identificadores.
+- [x] Confirmar o mapeamento dos códigos A–I para intervalos de profundidade (pesquisador confirmou 0–200 cm).
+- [x] Confirmar unidade amostral: `Amostra` identifica o ponto/parcela; `Profundidade` identifica a camada; não existe coluna `Parcela` separada.
+- [x] Inspecionar duplicatas e estrutura de agrupamento dos identificadores; preservar `Sample Number` como grupo até confirmação do significado laboratorial.
 - [ ] Confirmar se a base quadrática é a mesma usada nos resultados publicados.
 - [ ] Reproduzir os resultados originais com protocolo de validação documentado.
 - [ ] Implementar testes de integridade e contrato de dados.
@@ -117,3 +118,13 @@ Nas 224 unidades identificadas por `Sample Number`, os valores de TOC e N são c
 Também foram observados 28 valores únicos em `Amostra` e 224 combinações únicas `Amostra × Profundidade`. A semântica dos identificadores e sua relação com o plano amostral ainda precisa ser confirmada.
 
 A correlação de Pearson bruta entre TOC e N nesta base é aproximadamente 0,9351. Isso é uma descrição exploratória da base, não evidência de que um alvo possa substituir o outro nem de que ambos tenham o mesmo processo de referência.
+
+
+## 8. Confirmações recebidas após a auditoria inicial
+
+O pesquisador confirmou que:
+- A–I correspondem a 0–10, 10–20, 20–40, 40–60, 60–80, 80–100, 100–130, 130–160 e 160–200 cm, respectivamente.
+- `Amostra` é o número do ponto/parcela; a letra em `Profundidade` é a camada desse ponto.
+- Não existe coluna separada chamada `Parcela`.
+
+Essas confirmações já são refletidas em `depth.py`, `profile.py`, no dicionário de dados e na API. Permanecem pendentes as unidades/métodos de referência de TOC e N e a definição exata de `Sample Number`.
