@@ -17,7 +17,7 @@ from scipy.stats import pearsonr, spearmanr
 from .data import spectral_columns, validate_dataset
 from .depth import depth_metadata
 
-WAVELENGTH_PATTERN = re.compile(r"^r(\\d+)$")
+WAVELENGTH_PATTERN = re.compile(r"^r(\d+)$")
 
 
 def _numeric_summary(values: pd.Series) -> dict[str, float | int]:
