@@ -20,14 +20,14 @@ def fake_result(group, offset):
     y = small_frame()["TOC"].to_numpy()
     depth_prediction = y + 1.0
     scenario_prediction = y + offset
-    def folds(pred):
-        return [{"fold": i, "outer_metrics": {"rmse": float(abs(offset))},
+    def folds(rmse):
+        return [{"fold": i, "outer_metrics": {"rmse": rmse},
                  "selected_model": "bayesian_ridge"} for i in (1, 2)]
     return {
         "group_column": group, "n_observations": len(y),
         "scenarios": {
-            "depth_only": {"predictions": depth_prediction.tolist(), "folds": folds(depth_prediction)},
-            "nir_raw_plus_depth": {"predictions": scenario_prediction.tolist(), "folds": folds(scenario_prediction)},
+            "depth_only": {"predictions": depth_prediction.tolist(), "folds": folds(1.0)},
+            "nir_raw_plus_depth": {"predictions": scenario_prediction.tolist(), "folds": folds(offset)},
         },
     }
 
