@@ -57,11 +57,18 @@ def grouped_split_conformal(
     q_hat = _finite_sample_quantile(group_scores, alpha)
 
     test_pred = estimator.predict(x.iloc[test_idx])
-    lower, upper = test_pred - q_hat, test_pred + q_hat
-    covered = (y[test_idx] >= lower) & (y[test_idx] <= upper)
+    if np.isfinite(q_hat):
+        lower, upper = test_pred - q_hat, test_pred + q_hat
+        covered = (y[test_idx] >= lower) & (y[test_idx] <= upper)
+        lower_output, upper_output = lower.astype(float).tolist(), upper.astype(float).tolist()
+        quantile_output, width_output = q_hat, float(2.0 * q_hat)
+    else:
+        # JSON-safe representation of the mathematically unbounded interval.
+        covered = np.ones(len(test_idx), dtype=bool)
+        lower_output, upper_output = [None] * len(test_idx), [None] * len(test_idx)
+        quantile_output, width_output = None, None
     test_frame = pd.DataFrame({"group": groups[test_idx], "covered": covered})
     group_covered = test_frame.groupby("group", sort=False)["covered"].all().to_numpy()
-    finite_width = float(2.0 * q_hat) if np.isfinite(q_hat) else float("inf")
     return {
         "target": target, "group_column": group_column, "model": model_name, "alpha": alpha,
         "nominal_coverage": 1.0 - alpha, "n_groups_total": int(n_groups),
@@ -69,16 +76,16 @@ def grouped_split_conformal(
         "n_calibration_groups": int(len(group_scores)),
         "n_test_groups": int(pd.Series(groups[test_idx]).nunique()),
         "n_train_rows": int(len(train_idx)), "n_calibration_rows": int(len(cal_idx)),
-        "n_test_rows": int(len(test_idx)), "quantile": q_hat,
+        "n_test_rows": int(len(test_idx)), "quantile": quantile_output,\n        "interval_status": "finite" if np.isfinite(q_hat) else "unbounded",
         "metrics": {
             "row_coverage": float(np.mean(covered)),
             "group_simultaneous_coverage": float(np.mean(group_covered)),
-            "mean_interval_width": finite_width,
+            "mean_interval_width": width_output,
             "mae": float(mean_absolute_error(y[test_idx], test_pred)),
             "rmse": float(np.sqrt(mean_squared_error(y[test_idx], test_pred))),
         },
         "test_predictions": test_pred.astype(float).tolist(),
-        "test_lower": lower.astype(float).tolist(), "test_upper": upper.astype(float).tolist(),
+        "test_lower": lower_output, "test_upper": upper_output,
         "test_group_coverage": group_covered.astype(bool).tolist(),
         "calibration_warning": ("The finite-sample quantile is infinite because the calibration set has too few independent groups for the requested alpha." if not np.isfinite(q_hat) else None),
         "assumptions": "Finite-sample group-level coverage requires exchangeable independent groups. If Amostra points are spatially dependent or nested in blocks/treatments, define those higher-level groups before interpreting coverage.",
