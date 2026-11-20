@@ -45,3 +45,17 @@ def test_3d_payload_uses_categorical_points_and_negative_depth():
 def test_unknown_point_raises():
     with pytest.raises(KeyError):
         build_vertical_profile(profile_frame(), 999)
+
+
+def test_profile_rejects_conflicting_reference_values_within_sample_number():
+    frame = profile_frame()
+    frame.loc[1, "TOC"] += 1
+    with pytest.raises(ValueError, match="invariant"):
+        build_profile_summary(frame)
+
+
+def test_profile_rejects_sample_number_reused_across_layers():
+    frame = profile_frame()
+    frame.loc[frame.index[-1], "Sample Number"] = frame.loc[0, "Sample Number"]
+    with pytest.raises(ValueError, match="multiple sampling points or depth layers"):
+        build_profile_summary(frame)
