@@ -31,3 +31,21 @@ def test_onnx_export_matches_fitted_linear_pipeline(tmp_path):
     expected = model.predict(x[:8])
     assert result["size_bytes"] > 0
     assert np.allclose(actual, expected, atol=2e-4)
+
+
+
+def test_float_and_quantized_onnx_prediction_drift(tmp_path):
+    pytest.importorskip("onnx")
+    pytest.importorskip("onnxruntime")
+    from carbonapp.tinyml import compare_onnx_models, quantize_onnx_dynamic
+    rng = np.random.default_rng(22)
+    x = rng.normal(size=(60, 5))
+    y = 1.8 * x[:, 0] - 0.4 * x[:, 2]
+    model = build_model_pipeline("huber", k=4).fit(x, y)
+    float_path, int8_path = tmp_path / "float.onnx", tmp_path / "int8.onnx"
+    export_linear_pipeline_onnx(model, [f"r{1100+2*i}" for i in range(5)], float_path)
+    quantize_onnx_dynamic(float_path, int8_path)
+    result = compare_onnx_models(float_path, int8_path, x[:12])
+    assert result["n_predictions"] == 12
+    assert result["prediction_max_absolute_error"] >= 0
+    assert result["candidate_model_bytes"] > 0
