@@ -22,7 +22,7 @@ on:
     branches: [main]
     paths:
       - "src/carbonapp/depth_nir_benchmark.py"
-      - "scripts/run_depth_nir_benchmark.py"
+      - "scripts/run_depth_nir_benchmark.py"\n      - "src/carbonapp/depth_nir_residual_audit.py"\n      - "scripts/run_depth_nir_residual_audit.py"\n      - "tests/test_depth_nir_residual_audit.py"\n      - "docs/depth-nir-residual-audit.md"
       - "tests/test_depth_nir_benchmark.py"
       - ".github/workflows/depth-nir-benchmark.yml"
       - "data/raw/**"
@@ -62,10 +62,10 @@ jobs:
             --seed "${{ inputs.seed || '42' }}" \
             --outer-splits "${{ inputs.outer_splits || '5' }}" \
             --inner-splits "${{ inputs.inner_splits || '4' }}"
-      - name: Upload benchmark outputs
+      - name: Run residual audit\n        run: |\n          python scripts/run_depth_nir_residual_audit.py \\\n            --data "data/raw/[quad]base_nirs_refletancia.csv" \\\n            --results reports/depth-nir-benchmark \\\n            --output reports/depth-nir-residual-audit\n      - name: Upload benchmark outputs
         uses: actions/upload-artifact@v4
         with:
           name: carbonapp-depth-nir-benchmark-${{ github.run_number }}
-          path: reports/depth-nir-benchmark/
+          path: |\n            reports/depth-nir-benchmark/\n            reports/depth-nir-residual-audit/
           if-no-files-found: error
           retention-days: 30
