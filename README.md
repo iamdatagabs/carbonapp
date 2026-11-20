@@ -12,7 +12,7 @@ The repository includes a spectral dataset with:
 - metadata columns for sample, depth code, TOC and N;
 - no missing values observed in the TOC and N columns in the initial static audit.
 
-**Important:** units, laboratory reference methods, and the mapping between depth codes A–I and physical depth intervals must be confirmed from the experimental documentation before interpreting concentrations or building depth profiles.
+**Important:** the physical depth mapping is confirmed: A 0–10, B 10–20, C 20–40, D 40–60, E 60–80, F 80–100, G 100–130, H 130–160 and I 160–200 cm. TOC/N units and laboratory reference methods remain to be confirmed; values must not be assigned inferred units.
 
 ## Repository contents
 
@@ -21,7 +21,12 @@ The repository includes a spectral dataset with:
 | `data/raw/` | Original spectral dataset |
 | `docs/Dissertacao.pdf` | Master's dissertation |
 | `docs/technical-audit.md` | Initial methodological and software audit |
-| `docs/data-dictionary.md` | Preliminary data dictionary and ingestion rules |
+| `docs/data-dictionary.md` | Data dictionary, spectral schema and confirmed depth intervals |
+| `src/carbonapp/depth.py` | Authoritative 0–200 cm soil profile metadata |
+| `src/carbonapp/data.py` | Dataset schema validation and spectral-band discovery |
+| `src/carbonapp/evaluation.py` | GroupKFold evaluation with preprocessing inside each fold |
+| `tests/test_depth.py` | Tests for profile geometry |
+| `pyproject.toml` | Python package and development dependencies |
 | `Filtro_Carbono.ipynb` | Original filter-based feature-selection experiments |
 | `RFE_Carbon.ipynb` | Original recursive feature-elimination experiments |
 
@@ -46,7 +51,7 @@ The repository includes a spectral dataset with:
 
 ## Current status
 
-The current branch, `research/reproducible-core`, contains the first audit and data dictionary. The original notebooks are retained as historical research artifacts; their evaluation procedures require revision before their scores can be treated as unbiased estimates.
+The current branch, `research/reproducible-core`, contains the audit, data dictionary, authoritative depth metadata, dataset validation, a grouped Huber baseline and initial tests. The original notebooks are retained as historical research artifacts; their evaluation procedures require revision before their scores can be treated as unbiased estimates. The grouped evaluator keeps repeated `Sample Number` observations in the same GroupKFold fold and fits scaling and feature selection inside each fold.
 
 ## Citation and provenance
 
@@ -55,3 +60,24 @@ The original research is documented in `docs/Dissertacao.pdf`. Dataset provenanc
 ## License
 
 A license has not yet been specified. Until one is added, reuse and redistribution are subject to the applicable rights and permissions.
+
+## Local development
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+pip install -e ".[dev]"
+pytest
+```
+
+Run the grouped baseline from Python:
+
+```python
+from carbonapp.data import load_dataset
+from carbonapp.evaluation import grouped_oof_evaluation
+
+df = load_dataset("data/raw/[quad]base_nirs_refletancia.csv")
+results = grouped_oof_evaluation(df, target="TOC", n_splits=5)
+print(results["metrics"])
+```
