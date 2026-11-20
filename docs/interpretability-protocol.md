@@ -5,13 +5,13 @@
 This module provides three complementary views of model behavior:
 
 1. **Selection stability:** frequency with which each NIR band is selected by fold-local univariate feature selection across GroupKFold training partitions.
-2. **Grouped permutation importance:** increase in RMSE after permuting one wavelength on a held-out set of groups.
+2. **Grouped permutation importance:** increase in RMSE after shuffling between-group wavelength means on a held-out set, while retaining within-group deviations.
 3. **SHAP:** model-agnostic local additive attributions for predictions on held-out groups. Install the optional extra with `pip install -e ".[explainability]"`.
 4. **Depth-stratified importance:** independent grouped holdout analyses within each of the nine depth layers. Layers with too few groups are omitted or rejected.
 
 ## Grouping and leakage
 
-Use `Sample Number` as the default group while its relation to repeated scans/reference measurements remains the appropriate leakage boundary. Repeat analyses grouped by `Amostra` to test transfer to unseen sampling points. Train and test groups are disjoint in permutation and SHAP analyses. Selection stability fits the selector independently inside each GroupKFold training partition.
+Use `Sample Number` as the default group while its relation to repeated scans/reference measurements remains the appropriate leakage boundary. Repeat analyses grouped by `Amostra` to test transfer to unseen sampling points. Train and test groups are disjoint in permutation and SHAP analyses. Permutation shuffles group-level band means while preserving within-group deviations. SHAP background and explained subsets use one representative row per group to avoid over-weighting groups with more repeated rows. Selection stability fits the selector independently inside each GroupKFold training partition.
 
 ## Interpretation limits
 
