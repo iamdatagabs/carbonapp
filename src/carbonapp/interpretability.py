@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from sklearn.inspection import permutation_importance
 from sklearn.model_selection import GroupKFold, GroupShuffleSplit
 
 from .data import spectral_columns, validate_dataset
@@ -81,15 +80,36 @@ def grouped_permutation_importance(
     train_idx, test_idx = next(splitter.split(x, y, groups))
     estimator = build_model_pipeline(model_name, min(k, len(bands)), random_state)
     estimator.fit(x.iloc[train_idx], y[train_idx])
-    result = permutation_importance(
-        estimator, x.iloc[test_idx], y[test_idx], scoring="neg_root_mean_squared_error",
-        n_repeats=n_repeats, random_state=random_state, n_jobs=1,
-    )
+    x_test = x.iloc[test_idx].copy()
+    test_groups = groups[test_idx]
+    baseline_prediction = estimator.predict(x_test)
+    baseline_rmse = float(np.sqrt(np.mean((y[test_idx] - baseline_prediction) ** 2)))
+    unique_groups = pd.Index(pd.unique(test_groups))
+    group_rows = {group: np.flatnonzero(test_groups == group) for group in unique_groups}
+    rng = np.random.default_rng(random_state)
+    means, deviations = {}, {}
+    for band in bands:
+        means[band] = {group: float(x_test.iloc[idx][band].mean()) for group, idx in group_rows.items()}
+        deviations[band] = {group: x_test.iloc[idx][band].to_numpy() - means[band][group] for group, idx in group_rows.items()}
+    importance_means, importance_stds = [], []
+    for band in bands:
+        increases = []
+        for _ in range(n_repeats):
+            shuffled_means = rng.permutation([means[band][group] for group in unique_groups])
+            permuted = x_test.copy()
+            for group, replacement_mean in zip(unique_groups, shuffled_means):
+                idx = group_rows[group]
+                permuted.iloc[idx, permuted.columns.get_loc(band)] = replacement_mean + deviations[band][group]
+            pred = estimator.predict(permuted)
+            permuted_rmse = float(np.sqrt(np.mean((y[test_idx] - pred) ** 2)))
+            increases.append(permuted_rmse - baseline_rmse)
+        importance_means.append(float(np.mean(increases)))
+        importance_stds.append(float(np.std(increases, ddof=1)) if n_repeats > 1 else 0.0)
     importance = pd.DataFrame({
         "band": bands,
         "wavelength_nm": [int(name[1:]) for name in bands],
-        "importance_mean": result.importances_mean,
-        "importance_std": result.importances_std,
+        "importance_mean": importance_means,
+        "importance_std": importance_stds,
     }).sort_values("importance_mean", ascending=False).reset_index(drop=True)
     return {
         "target": target, "group_column": group_column, "model": model_name,
@@ -97,7 +117,7 @@ def grouped_permutation_importance(
         "n_test_groups": int(pd.Series(groups[test_idx]).nunique()),
         "baseline_test_rmse": float(np.sqrt(np.mean((y[test_idx] - estimator.predict(x.iloc[test_idx])) ** 2))),
         "importance": importance,
-        "interpretation": "Importance is the increase in held-out RMSE after permuting one band. Correlated neighboring wavelengths can share or mask importance; scores are not causal effects.",
+        "interpretation": "Importance is the increase in held-out RMSE after shuffling between-group band means while preserving within-group deviations. Correlated neighboring wavelengths can share or mask importance; scores are not causal effects.",
     }
 
 
@@ -129,8 +149,14 @@ def grouped_shap_explanation(
     train_idx, test_idx = next(splitter.split(x, y, groups))
     estimator = build_model_pipeline(model_name, min(k, len(bands)), random_state)
     estimator.fit(x.iloc[train_idx], y[train_idx])
-    background = x.iloc[train_idx].sample(n=min(background_size, len(train_idx)), random_state=random_state)
-    explain = x.iloc[test_idx].sample(n=min(explain_size, len(test_idx)), random_state=random_state)
+    train_representatives = x.iloc[train_idx].copy()
+    train_representatives["_group"] = groups[train_idx]
+    train_representatives = train_representatives.drop_duplicates("_group").drop(columns="_group")
+    test_representatives = x.iloc[test_idx].copy()
+    test_representatives["_group"] = groups[test_idx]
+    test_representatives = test_representatives.drop_duplicates("_group").drop(columns="_group")
+    background = train_representatives.sample(n=min(background_size, len(train_representatives)), random_state=random_state)
+    explain = test_representatives.sample(n=min(explain_size, len(test_representatives)), random_state=random_state)
     explainer = shap.Explainer(estimator.predict, background)
     values = explainer(explain)
     shap_values = np.asarray(values.values)
@@ -145,6 +171,8 @@ def grouped_shap_explanation(
         "target": target, "group_column": group_column, "model": model_name,
         "n_train_groups": int(pd.Series(groups[train_idx]).nunique()),
         "n_test_groups": int(pd.Series(groups[test_idx]).nunique()),
+        "n_background_groups": int(len(background)),
+        "n_explained_groups": int(len(explain)),
         "base_value": float(np.asarray(values.base_values).mean()),
         "importance": summary,
         "interpretation": "SHAP values explain this fitted model's predictions relative to the sampled background. They are not causal effects or proof of molecular mechanisms.",
