@@ -26,6 +26,8 @@ def export_linear_pipeline_onnx(estimator, feature_names: list[str], output_path
     """Export a fitted SelectKBest + optional StandardScaler + linear sklearn pipeline."""
     onnx = _optional_onnx()
     steps = getattr(estimator, "named_steps", {})
+    if set(steps).difference({"select", "scale", "model"}):
+        raise ValueError("Pipeline contains unsupported transformations")
     if "select" not in steps or "model" not in steps:
         raise ValueError("Expected a fitted pipeline with 'select' and 'model' steps")
     selector, model = steps["select"], steps["model"]
@@ -34,7 +36,7 @@ def export_linear_pipeline_onnx(estimator, feature_names: list[str], output_path
     if len(feature_names) != int(selector.n_features_in_):
         raise ValueError("feature_names length must match the pipeline input feature count")
     selected = selector.get_support(indices=True)
-    coefficients = np.asarray(model.coef_, dtype=np.float32).reshape(-1)
+    coefficients = np.asarray(model.coef_, dtype=np.float64).reshape(-1)
     if len(coefficients) != len(selected):
         raise ValueError("Selected feature count does not match linear coefficient count")
     intercept = float(np.asarray(model.intercept_).reshape(-1)[0])
@@ -42,10 +44,10 @@ def export_linear_pipeline_onnx(estimator, feature_names: list[str], output_path
         scaler = steps["scale"]
         scales = np.asarray(scaler.scale_, dtype=np.float64)
         means = np.asarray(scaler.mean_, dtype=np.float64)
-        coefficients_raw = coefficients.astype(np.float64) / scales[selected]
-        intercept -= float(np.sum(coefficients.astype(np.float64) * means[selected] / scales[selected]))
+        coefficients_raw = coefficients / scales[selected]
+        intercept -= float(np.sum(coefficients * means[selected] / scales[selected]))
     else:
-        coefficients_raw = coefficients.astype(np.float64)
+        coefficients_raw = coefficients
     weights = np.zeros(len(feature_names), dtype=np.float32)
     weights[selected] = coefficients_raw.astype(np.float32)
     bias = np.asarray([intercept], dtype=np.float32)
@@ -79,6 +81,10 @@ def quantize_onnx_dynamic(input_path: str | Path, output_path: str | Path) -> di
     except ImportError as exc:
         raise ImportError("Install TinyML dependencies with: pip install -e '.[tinyml]'") from exc
     source, output = Path(input_path), Path(output_path)
+    if source.resolve() == output.resolve():
+        raise ValueError("input_path and output_path must be different")
+    if not source.exists():
+        raise FileNotFoundError(source)
     output.parent.mkdir(parents=True, exist_ok=True)
     quantize_dynamic(str(source), str(output), weight_type=QuantType.QInt8)
     return {
@@ -168,4 +174,42 @@ def benchmark_sklearn_estimator(
         "latency_ms_p95": float(np.percentile(durations, 95)),
         "python_peak_allocated_bytes": int(peak),
         "memory_note": "Python-traced allocations only; not process RSS or embedded-device RAM.",
+    }
+
+
+
+def compare_onnx_models(
+    reference_path: str | Path,
+    candidate_path: str | Path,
+    spectra: pd.DataFrame | np.ndarray,
+) -> dict:
+    """Compare two ONNX artifacts on identical spectra, measuring prediction drift."""
+    try:
+        import onnxruntime as ort
+    except ImportError as exc:
+        raise ImportError("Install TinyML dependencies with: pip install -e '.[tinyml]'") from exc
+    x = np.asarray(spectra, dtype=np.float32)
+    if x.ndim == 1:
+        x = x.reshape(1, -1)
+    if x.ndim != 2:
+        raise ValueError("spectra must be a 1D or 2D numeric array")
+    reference = ort.InferenceSession(str(reference_path), providers=["CPUExecutionProvider"])
+    candidate = ort.InferenceSession(str(candidate_path), providers=["CPUExecutionProvider"])
+    ref_input, cand_input = reference.get_inputs()[0], candidate.get_inputs()[0]
+    if ref_input.shape[1] != cand_input.shape[1] or (isinstance(ref_input.shape[1], int) and x.shape[1] != ref_input.shape[1]):
+        raise ValueError("Reference, candidate and spectra feature dimensions must match")
+    y_ref = np.asarray(reference.run(None, {ref_input.name: x})[0], dtype=np.float64).reshape(-1)
+    y_candidate = np.asarray(candidate.run(None, {cand_input.name: x})[0], dtype=np.float64).reshape(-1)
+    delta = y_candidate - y_ref
+    return {
+        "n_predictions": int(len(delta)),
+        "reference_model_bytes": int(Path(reference_path).stat().st_size),
+        "candidate_model_bytes": int(Path(candidate_path).stat().st_size),
+        "size_reduction_fraction": float(1 - Path(candidate_path).stat().st_size / Path(reference_path).stat().st_size),
+        "prediction_mae": float(np.mean(np.abs(delta))),
+        "prediction_rmse": float(np.sqrt(np.mean(delta ** 2))),
+        "prediction_max_absolute_error": float(np.max(np.abs(delta))),
+        "reference_predictions": y_ref.tolist(),
+        "candidate_predictions": y_candidate.tolist(),
+        "interpretation": "Prediction drift is measured against the float/reference ONNX artifact. Task accuracy must additionally be evaluated against laboratory targets on held-out groups.",
     }
