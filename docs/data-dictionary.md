@@ -92,3 +92,12 @@ A base possui 224 valores únicos de `Sample Number` em 266 registros:
 Os valores de TOC e N são iguais entre registros que compartilham o mesmo `Sample Number`. A hipótese de que sejam réplicas espectrais deve ser validada com o protocolo experimental. Até lá, `Sample Number` deve ser preservado como identificador de agrupamento e jamais usado como preditor numérico.
 
 **Regra de particionamento:** todas as linhas de um mesmo `Sample Number` devem ficar juntas na mesma partição de treino, validação ou teste. Isso evita que medições associadas ao mesmo resultado laboratorial sejam distribuídas entre treino e teste. Em análises inferenciais por profundidade, a unidade de pareamento/cluster é o ponto identificado por `Amostra`, e não cada linha nem cada camada isoladamente.
+
+
+## Unidade amostral e perfil vertical — confirmação do pesquisador
+
+- Não existe coluna independente chamada `Parcela`.
+- `Amostra` é o número do ponto/parcela de coleta.
+- `Profundidade` é o código da camada dentro do ponto.
+- O perfil vertical vai de 0 a 200 cm, com espessuras proporcionais reais.
+- `Sample Number` é mantido como identificador de agrupamento contra vazamento; sua semântica como leitura técnica ou amostra de laboratório ainda depende do protocolo original.
