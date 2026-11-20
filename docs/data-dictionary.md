@@ -61,3 +61,15 @@ Os valores são reportados na escala armazenada no CSV. Unidades ainda não conf
 5. Validar explicitamente o mapeamento de profundidade.
 6. Registrar hash/versão do arquivo de origem e parâmetros de qualquer transformação.
 7. Não preencher unidades ou significados ausentes por inferência.
+
+
+## Identificadores repetidos e agrupamento
+
+A base possui 224 valores únicos de `Sample Number` em 266 registros:
+- 189 identificadores com uma linha;
+- 28 identificadores com duas linhas;
+- 7 identificadores com três linhas.
+
+Os valores de TOC e N são iguais entre registros que compartilham o mesmo `Sample Number`. A hipótese de que sejam réplicas espectrais deve ser validada com o protocolo experimental. Até lá, `Sample Number` deve ser preservado como identificador de agrupamento e jamais usado como preditor numérico.
+
+**Regra de particionamento:** todas as linhas de um mesmo `Sample Number` devem ficar juntas na mesma partição de treino, validação ou teste. Isso evita que medições associadas ao mesmo resultado laboratorial sejam distribuídas entre treino e teste.
