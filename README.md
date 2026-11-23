@@ -15,6 +15,26 @@ The product foundation is being developed alongside the research core:
 
 The first Android save action is an in-memory draft, not durable offline storage. The backend is a development scaffold and is not ready for public exposure: authentication, authorization, migration-managed schema and idempotent synchronization remain future work. The scientific Python package remains responsible for model training and inference.
 
+## Reusable Python package
+
+The scientific core is installable as the Python distribution `carbonapp-research-core` and exposes the `carbonapp` import namespace. A small public spectral-utilities API is available for wavelength-indexed NIR tables:
+
+```python
+from carbonapp.spectra import (
+    spectral_columns,
+    select_spectral_window,
+    validate_spectral_matrix,
+    wavelength_nm,
+)
+
+bands = spectral_columns(frame)
+candidate = select_spectral_window(frame, 1440, 1488)
+validate_spectral_matrix(candidate)
+print(wavelength_nm("r1470"))  # 1470
+```
+
+The wavelength window is inclusive and returned in numeric wavelength order. The helpers reject duplicate wavelength aliases and non-finite spectral matrices. They do not infer units, perform calibration, or replace the study-specific validation protocol. Install locally with `pip install -e ".[dev,api]"`.
+
 ## Dataset and scientific scope
 
 The initial static audit of `data/raw/[quad]base_nirs_refletancia.csv` recorded 266 rows, 275 NIR bands from 1,100 to 1,648 nm at 2 nm intervals, and no missing values in TOC or N. The physical depth intervals were confirmed as:

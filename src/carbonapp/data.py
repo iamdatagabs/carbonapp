@@ -2,21 +2,15 @@
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pandas as pd
 
 from .depth import DEPTH_BY_CODE
+from .spectra import spectral_columns
 
-SPECTRAL_PATTERN = re.compile(r"^r(\d+)$")
 IDENTIFIER_COLUMNS = ("Indice", "Amostra", "Profundidade", "Sample Number")
 TARGET_COLUMNS = ("TOC", "N")
-
-
-def spectral_columns(frame: pd.DataFrame) -> list[str]:
-    columns = [name for name in frame.columns if SPECTRAL_PATTERN.match(str(name))]
-    return sorted(columns, key=lambda name: int(SPECTRAL_PATTERN.match(name).group(1)))
 
 
 def load_dataset(path: str | Path) -> pd.DataFrame:
@@ -35,6 +29,7 @@ def validate_dataset(frame: pd.DataFrame) -> None:
     bands = spectral_columns(frame)
     if not bands:
         raise ValueError("No spectral columns found (expected names such as r1100)")
+
     if frame.empty:
         raise ValueError("Dataset is empty")
 
