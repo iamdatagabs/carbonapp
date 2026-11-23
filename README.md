@@ -146,7 +146,7 @@ The runner writes a dataset hash manifest, nested grouped CV at reference and po
 
 The API is deployed on Render Free and may spin down after 15 minutes without traffic. The first request after inactivity can take about a minute. Its current public routes are read-only GET endpoints for depth metadata, dataset summaries and vertical-profile payloads. Do not add public write or personally identifiable data endpoints without authentication, authorization and security review.
 
-The static research dashboard is published at [https://iamdatagabs.github.io/carbonapp/](https://iamdatagabs.github.io/carbonapp/) and is configured to call the API above. The Pages workflow publishes `apps/frontend/` whenever its files change.
+The static research dashboard is published at [https://iamdatagabs.github.io/carbonapp/](https://iamdatagabs.github.io/carbonapp/) and is configured to call the API above. It provides a searchable point/layer catalog, multi-point vertical-profile comparison, CSV export and a categorical 3D point × depth view, with TOC/N target selection. These are exploratory views: the 3D display is not a georeferenced or interpolated soil volume. The Pages workflow publishes `apps/frontend/` whenever its files change; the repository-root `index.html` also redirects visitors to the dashboard as a fallback for root-based Pages configurations.
 
 Install the Python API extra and start the research API locally:
 
