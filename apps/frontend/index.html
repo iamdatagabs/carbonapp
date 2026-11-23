@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="CarbonApp — exploração científica de perfis verticais e espectroscopia NIR do solo.">
-  <title>CarbonApp | Soil Spectroscopy Research</title>
+  <title>CarbonApp | Scientific Data Explorer</title>
   <link rel="preconnect" href="https://cdn.plot.ly">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
@@ -18,53 +18,80 @@
     .toolbar,.panel,.metric{background:var(--card);border:1px solid var(--line);border-radius:16px}
     .toolbar{display:flex;flex-wrap:wrap;gap:18px;align-items:end;padding:18px;margin-bottom:18px}
     label{display:grid;gap:5px;font-size:.8rem;font-weight:700;color:var(--muted)}
-    select{min-width:150px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink);font:inherit}
+    select,input{min-width:150px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink);font:inherit}
     .status{margin-left:auto;color:var(--muted);font-size:.85rem}
     .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
     .metric{padding:16px}.metric small{display:block;color:var(--muted)}.metric strong{font:1.6rem Georgia,serif}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{padding:16px;min-width:0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{padding:16px;min-width:0;margin-bottom:18px}
     h2{font:1.25rem Georgia,serif;margin:0 0 4px}.sub{color:var(--muted);font-size:.82rem;margin:0 0 8px}
-    .chart{height:390px}.warning{padding:12px 14px;border-left:3px solid var(--brown);background:#f4eee5;color:#66523f;border-radius:6px;margin-top:18px;font-size:.86rem}
+    .chart{height:390px}.warning{padding:12px 14px;border-left:3px solid var(--brown);background:#f4eee5;color:#66523f;border-radius:6px;margin:18px 0;font-size:.86rem}
+    .section-head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+    .section-head input{max-width:260px}.table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:.76rem;text-transform:uppercase;letter-spacing:.05em}
+    .selection{display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:14px;align-items:start;margin:14px 0}
+    .selection select{width:100%;min-height:150px}.hint{font-size:.82rem;color:var(--muted)}
+    button{border:0;border-radius:9px;background:var(--green);color:white;padding:10px 15px;font:inherit;font-weight:650;cursor:pointer}
+    button:disabled{opacity:.45;cursor:not-allowed}
     footer{max-width:1200px;margin:0 auto;padding:0 20px 30px;color:var(--muted);font-size:.8rem}
-    @media(max-width:760px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}.status{width:100%;margin:0}.chart{height:330px}}
+    @media(max-width:760px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}.status{width:100%;margin:0}.chart{height:330px}.selection{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <header>
   <div class="eyebrow">Research platform · NIR spectroscopy</div>
   <h1>CarbonApp</h1>
-  <p>Exploração de perfis verticais de solo, dados espectrais e estimativas de carbono orgânico total e nitrogênio.</p>
+  <p>Explore, compare e exporte perfis verticais de solo e dados de carbono orgânico total e nitrogênio.</p>
 </header>
 <main>
-  <section class="toolbar" aria-label="Dashboard filters">
+  <section class="toolbar" aria-label="Filtros do dashboard">
     <label>Alvo
       <select id="target"><option value="TOC">Carbono orgânico total (TOC)</option><option value="N">Nitrogênio (N)</option></select>
-    </label>
-    <label>Ponto de amostragem
-      <select id="point"><option value="">Todos os pontos</option></select>
     </label>
     <div class="status" id="status" role="status">Conectando à API…</div>
   </section>
   <section class="metrics">
-    <div class="metric"><small>Observações</small><strong id="rows">—</strong></div>
+    <div class="metric"><small>Observações na base</small><strong id="rows">—</strong></div>
     <div class="metric"><small>Pontos de amostragem</small><strong id="points">—</strong></div>
     <div class="metric"><small>Bandas espectrais NIR</small><strong id="bands">—</strong></div>
   </section>
+
+  <section class="panel">
+    <div class="section-head"><div><h2>Catálogo de pontos</h2><p class="sub">Pontos e camadas presentes no conjunto de dados do alvo selecionado.</p></div>
+      <input id="catalogSearch" type="search" placeholder="Buscar ponto…" aria-label="Buscar ponto"></div>
+    <p class="hint" id="catalogCount">Carregando catálogo…</p>
+    <div class="table-wrap"><table><thead><tr><th>Ponto</th><th>Observações</th><th>Camadas disponíveis</th></tr></thead><tbody id="catalogBody"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Comparação de perfis verticais</h2>
+    <p class="sub">Selecione vários pontos para comparar os valores por profundidade. A profundidade aumenta para baixo.</p>
+    <div class="selection">
+      <div><label for="pointsSelect">Pontos para comparar (Ctrl/Cmd para múltipla seleção)</label>
+        <select id="pointsSelect" multiple aria-describedby="selectionHint"></select>
+        <p class="hint" id="selectionHint">Carregando pontos…</p></div>
+      <div><div id="comparison" class="chart" aria-label="Comparação dos perfis verticais"></div>
+        <div class="section-head"><span class="hint" id="comparisonHint">Selecione pontos no catálogo para gerar a comparação.</span>
+          <button id="exportCsv" type="button" disabled>Exportar seleção CSV</button></div></div>
+    </div>
+  </section>
+
   <section class="grid">
     <article class="panel">
-      <h2>Perfil vertical</h2>
-      <p class="sub">Intervalos com espessuras reais, de 0 a 200 cm.</p>
-      <div id="vertical" class="chart" aria-label="Perfil vertical"></div>
-    </article>
-    <article class="panel">
-      <h2>Perfil ponto × profundidade</h2>
-      <p class="sub">Visualização 3D categórica; não representa coordenadas geográficas.</p>
+      <h2>Distribuição ponto × profundidade</h2>
+      <p class="sub">Visualização 3D categórica; o eixo dos pontos não representa coordenadas geográficas.</p>
       <div id="threeD" class="chart" aria-label="Perfil tridimensional categórico"></div>
     </article>
+    <article class="panel">
+      <h2>Como interpretar</h2>
+      <p class="sub">Limites de interpretação dos dados exibidos</p>
+      <p>Os valores apresentados correspondem às agregações disponibilizadas pela API. A comparação utiliza médias por ponto e camada, com contagem de Sample Numbers por perfil.</p>
+      <p>O catálogo lista os pontos e as camadas com observações disponíveis para o alvo escolhido. A exportação contém os perfis selecionados e seus metadados de profundidade.</p>
+      <p>As concentrações, unidades e métodos de referência laboratorial ainda dependem de confirmação documental. Correlação, causalidade e inferência espacial não são presumidas pelo dashboard.</p>
+    </article>
   </section>
-  <div class="warning">Interpretação: as concentrações exibidas são valores armazenados na base. Unidades e métodos de referência laboratorial ainda precisam ser confirmados. A visualização não interpola um volume espacial.</div>
+  <div class="warning">Cautela metodológica: esta é uma ferramenta de exploração científica. A visualização ponto × profundidade não é um volume geográfico interpolado. Unidades e métodos laboratoriais precisam ser confirmados antes de interpretações quantitativas conclusivas.</div>
 </main>
-<footer>CarbonApp Research Core · API v1 · Use os resultados como exploração científica até concluir validação externa e documentação laboratorial.</footer>
+<footer>CarbonApp Research Core · API v1 · Dashboard público para exploração e comparação de dados.</footer>
 <script>window.CARBONAPP_API_BASE = "https://carbonapp-research-api.onrender.com";</script>
 <script src="./app.js"></script>
 </body>
