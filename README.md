@@ -91,7 +91,7 @@ pip install -e ".[dev,api]"
 pytest -q
 ```
 
-The CI workflow installs `.[dev,api]` and runs the test suite on Python 3.11. Optional explainability and TinyML dependencies are installed separately:
+The CI workflow installs `.[dev,api]` and runs the test suite on Python 3.10, 3.11 and 3.12. Optional explainability and TinyML dependencies are installed separately:
 
 ```bash
 pip install -e ".[explainability]"
