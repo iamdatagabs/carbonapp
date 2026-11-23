@@ -128,3 +128,16 @@ O pesquisador confirmou que:
 - Não existe coluna separada chamada `Parcela`.
 
 Essas confirmações já são refletidas em `depth.py`, `profile.py`, no dicionário de dados e na API. Permanecem pendentes as unidades/métodos de referência de TOC e N e a definição exata de `Sample Number`.
+
+
+## 9. Atualização de status documental — 23/11/2026
+
+Esta auditoria é um registro histórico da inspeção inicial, não uma descrição integral do estado atual do repositório. As observações das seções 1–6 refletem o estado observado em 20/11/2026 e devem ser lidas junto às confirmações e atualizações abaixo.
+
+- O README da raiz foi posteriormente desenvolvido e atualizado; a afirmação inicial de que ainda não havia documentação substantiva não descreve o estado atual.
+- O mapeamento físico A–I foi confirmado pelo pesquisador e está documentado no dicionário de dados e no módulo de profundidade. A pendência correspondente da seção 4 foi resolvida.
+- A estrutura do produto evoluiu para incluir dashboard científico estático, API Python/FastAPI, API Java/Spring Boot, cliente web de captura e protótipo Android. A documentação atualizada de cada superfície está em [Frontend e APIs](api-and-frontend.md), [Arquitetura](application-architecture.md) e nos READMEs das aplicações.
+- O dashboard científico está publicado no GitHub Pages e consome a API pública de pesquisa hospedada no Render. Essa API é distinta do backend Java do MVP.
+- A auditoria original dos notebooks e riscos metodológicos continua relevante como diagnóstico histórico. Não significa que os notebooks sejam o caminho de execução mantido: o núcleo científico atual está no pacote `src/carbonapp/` e nos testes automatizados.
+
+Continuam pendentes, salvo documentação primária posterior: unidades e métodos de referência de TOC/N; significado laboratorial de `Sample Number`; confirmação de independência/estrutura espacial dos pontos; e reprodução independente dos resultados publicados. Não transformar esses itens em fatos presumidos.
