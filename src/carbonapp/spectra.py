@@ -82,13 +82,17 @@ def validate_spectral_matrix(
 
     Returns the validated column names without changing the input frame.
     """
-    selected = spectral_columns(frame) if columns is None else list(columns)
+    available = spectral_columns(frame)
+    selected = available if columns is None else list(columns)
     if not selected:
         raise ValueError("At least one spectral column is required")
 
     missing = [column for column in selected if column not in frame.columns]
     if missing:
         raise ValueError(f"Missing spectral columns: {', '.join(missing)}")
+    non_spectral = [column for column in selected if column not in available]
+    if non_spectral:
+        raise ValueError(f"Not spectral columns: {', '.join(non_spectral)}")
 
     matrix = frame.loc[:, selected].apply(pd.to_numeric, errors="coerce")
     values = matrix.to_numpy(dtype=float)
