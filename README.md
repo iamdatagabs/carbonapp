@@ -2,7 +2,7 @@
 
 A reproducible research codebase for near-infrared (NIR) soil spectroscopy, prediction of total organic carbon (TOC), exploratory nitrogen analysis, uncertainty estimation, spectral interpretability, compact model export and interactive vertical-profile exploration.
 
-The original research notebooks and source data are preserved. New engineering work lives in `research/reproducible-core` branch until it has passed automated validation and scientific review.
+The original research notebooks and source data are preserved. The maintained scientific core is deployed from `main`; experimental changes should enter through focused branches and pull requests, with automated validation and scientific review before release.
 
 ## Product applications (MVP)
 
@@ -91,7 +91,7 @@ pip install -e ".[dev,api]"
 pytest -q
 ```
 
-The CI workflow installs `.[dev,api]` and runs the test suite on Python 3.11. Optional explainability and TinyML dependencies are installed separately:
+The CI workflow installs `.[dev,api]` and runs the test suite on Python 3.10, 3.11 and 3.12. Optional explainability and TinyML dependencies are installed separately:
 
 ```bash
 pip install -e ".[explainability]"
@@ -142,7 +142,13 @@ The runner writes a dataset hash manifest, nested grouped CV at reference and po
 
 ## API and interactive dashboard
 
-Install the Python API extra and start the research API:
+**Public read-only research API:** [https://carbonapp-research-api.onrender.com](https://carbonapp-research-api.onrender.com) · [Health](https://carbonapp-research-api.onrender.com/health) · [OpenAPI docs](https://carbonapp-research-api.onrender.com/docs).
+
+The API is deployed on Render Free and may spin down after 15 minutes without traffic. The first request after inactivity can take about a minute. Its current public routes are read-only GET endpoints for depth metadata, dataset summaries and vertical-profile payloads. Do not add public write or personally identifiable data endpoints without authentication, authorization and security review.
+
+The static research dashboard is published at [https://iamdatagabs.github.io/carbonapp/](https://iamdatagabs.github.io/carbonapp/) and is configured to call the API above. The Pages workflow publishes `apps/frontend/` whenever its files change.
+
+Install the Python API extra and start the research API locally:
 
 ```bash
 pip install -e ".[api]"
