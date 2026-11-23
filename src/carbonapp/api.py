@@ -41,9 +41,24 @@ def create_app(data_path: str | Path | None = None):
         except (ValueError, OSError) as exc:
             raise HTTPException(status_code=422, detail=f"Dataset validation failed: {exc}") from exc
 
+    @app.get("/", include_in_schema=False)
+    def root():
+        return {
+            "service": "CarbonApp Research API",
+            "version": app.version,
+            "status": "ok",
+            "health": "/health",
+            "docs": "/docs",
+            "openapi": "/openapi.json",
+        }
+
     @app.get("/health")
     def health():
-        return {"status": "ok", "dataset_configured": resolved_path.exists()}
+        return {
+            "status": "ok",
+            "dataset_configured": resolved_path.is_file(),
+            "dataset_size_bytes": resolved_path.stat().st_size if resolved_path.is_file() else None,
+        }
 
     @app.get("/api/v1/metadata/depths")
     def depths():
