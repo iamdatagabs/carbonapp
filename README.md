@@ -10,6 +10,7 @@ The product foundation is being developed alongside the research core:
 - **Web:** `apps/web/` — responsive field-capture console connected to Java API; `apps/frontend/` remains the research dashboard with vertical and categorical 3D profile exploration.
 - **Backend:** `apps/backend/` — Java 21 / Spring Boot REST API, PostgreSQL persistence and versioned endpoints.
 - **Android:** `apps/mobile/` — Kotlin + Jetpack Compose field-capture prototype.
+- **Documentation index:** [docs/README.md](docs/README.md).
 - **Architecture and roadmap:** [docs/application-architecture.md](docs/application-architecture.md).
 - **API contract:** [docs/openapi-v1.yaml](docs/openapi-v1.yaml).
 

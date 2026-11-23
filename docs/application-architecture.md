@@ -29,10 +29,11 @@ Do not treat historical `Sample Number` as a confirmed physical sample ID until 
 
 ## MVP 0
 - Spring Boot API: health, depth metadata and PostgreSQL field-record capture.
-- Android Compose capture screen with local-draft state.
-- Existing web dashboard remains the research visualization client.
+- Responsive web capture client in `apps/web/`, connected to the Java API.
+- Android Compose capture screen with local-draft state (in-memory only).
+- Existing `apps/frontend/` dashboard remains the separate scientific visualization client, backed by the Python/FastAPI research API.
 - OpenAPI contract and Docker Compose for API + PostgreSQL.
-- No production auth, multi-tenancy or scientific claims yet.
+- No production authentication, multi-tenancy or scientific decision-support claims yet.
 
 ## MVP 1
 Project/point management, sample registration, QR labels, immutable spectrum uploads, lab results with units/method, Python analysis jobs and versioned model runs.
