@@ -17,14 +17,14 @@
 
   async function loadTarget(selectedTarget) {
     if (targetCache.has(selectedTarget)) return targetCache.get(selectedTarget);
-    const [health, summary, cloud] = await Promise.all([
-      get("/health"),
-      get(`/api/v1/dataset/summary?target=${selectedTarget}`),
-      get(`/api/v1/profiles-3d?target=${selectedTarget}`)
-    ]);
+    const health = await get("/health");
     if (!health.dataset_configured) {
       throw new Error("API disponível, mas o conjunto de dados não está configurado no servidor.");
     }
+    const [summary, cloud] = await Promise.all([
+      get(`/api/v1/dataset/summary?target=${selectedTarget}`),
+      get(`/api/v1/profiles-3d?target=${selectedTarget}`)
+    ]);
     const data = {summary, cloud};
     targetCache.set(selectedTarget, data);
     return data;
