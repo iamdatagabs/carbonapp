@@ -19,7 +19,13 @@ def synthetic_csv(path):
 
 def test_api_depth_metadata_and_health(tmp_path):
     client = TestClient(create_app(tmp_path / "missing.csv"))
-    assert client.get("/health").json()["status"] == "ok"
+    root = client.get("/")
+    assert root.status_code == 200
+    assert root.json()["service"] == "CarbonApp Research API"
+    health = client.get("/health")
+    assert health.status_code == 200
+    assert health.json()["status"] == "ok"
+    assert health.json()["dataset_configured"] is False
     result = client.get("/api/v1/metadata/depths")
     assert result.status_code == 200
     assert result.json()["intervals"][-1]["bottom_cm"] == 200
