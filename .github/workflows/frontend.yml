@@ -1,0 +1,48 @@
+name: Frontend validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/frontend/**"
+      - ".github/workflows/frontend.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/frontend/**"
+      - ".github/workflows/frontend.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check dashboard JavaScript syntax
+        run: node --check apps/frontend/app.js
+      - name: Verify required dashboard sections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          html = Path("apps/frontend/index.html").read_text(encoding="utf-8")
+          js = Path("apps/frontend/app.js").read_text(encoding="utf-8")
+          required_ids = [
+              "target", "pointsSelect", "catalogSearch", "catalogBody",
+              "comparison", "exportCsv", "threeD", "status",
+          ]
+          missing = [item for item in required_ids if f'id="{item}"' not in html]
+          if missing:
+              raise SystemExit(f"Missing dashboard elements: {missing}")
+          for endpoint in ("/health", "/api/v1/dataset/summary", "/api/v1/profiles-3d", "/api/v1/profiles/"):
+              if endpoint not in js:
+                  raise SystemExit(f"Missing API integration: {endpoint}")
+          print("Frontend structure and API integration checks passed.")
+          PY
