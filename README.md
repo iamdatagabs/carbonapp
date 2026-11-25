@@ -4,7 +4,7 @@ A reproducible research codebase for near-infrared (NIR) soil spectroscopy, pred
 
 The original research notebooks and source data are preserved. The maintained scientific core is deployed from `main`; experimental changes should enter through focused branches and pull requests, with automated validation and scientific review before release.
 
-## Product applications (MVP)
+**Research dashboard:** [GitHub Pages](https://iamdatagabs.github.io/carbonapp/) · **API documentation:** [Render](https://carbonapp-research-api.onrender.com/docs) · **Portfolio:** [Gabriel Passos](https://iamdatagabs.github.io/iamdatagabs/portfolio/)\n\n## Product applications (MVP)
 
 The product foundation is being developed alongside the research core:
 - **Web:** `apps/web/` — responsive field-capture console connected to Java API; `apps/frontend/` remains the research dashboard with vertical and categorical 3D profile exploration.
